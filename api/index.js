@@ -110,7 +110,6 @@ app.post('/api/move', (req, res) => {
 app.post('/api/shift', (req, res) => {
   const { id, shift } = req.body;
   const data = readData();
-  
   const person = data.people.find(p => p.id === id);
   if (person) {
     person.shift = shift;
