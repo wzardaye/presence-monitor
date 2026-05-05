@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Workplace Monitor</title>
+</head>
+<body>
+
+<div class="header">
+  Last Updated: <span id="lastUpdatedText">-</span>
+</div>
+
+<div id="org"></div>
+
+<select id="areaSelect"></select>
+
+<script>
+let DATA = {};
+
+function updateLastUpdated(timestamp) {
+  const el = document.getElementById('lastUpdatedText');
+  if (!el) return;
+  if (!timestamp) {
+    el.innerText = '-';
+    return;
+  }
+  el.innerText = new Date(timestamp).toLocaleString();
+}
+
+function render() {
+  if (!DATA || !DATA.people) return;
+
+  const org = document.getElementById('org');
+  if (!org) return;
+
+  org.innerHTML = '';
+
+  let presentCount = 0;
+
+  DATA.people.forEach(p => {
+    const div = document.createElement('div');
+    
+    div.className = 'person ' + (p.present ? 'present' : 'absent');
+    div.innerHTML = `
+      <img src="${p.avatar || 'images/default.png'}" class="avatar"
+      onerror="this.src='images/default.png'">
+      <div>${p.name}</div>
+    `;
+
+    if (p.present) presentCount++;
+
+    org.appendChild(div);
+  });
+
+  updateCircle(presentCount, DATA.people.length);
+}
+
+function renderAreas() {
+  if (!DATA || !DATA.areas) return;
+  console.log('Areas rendered');
+}
+
+function initAreaDropdown() {
+  if (!DATA || !DATA.areas) return;
+
+  const select = document.getElementById('areaSelect');
+  if (!select) return;
+
+  select.innerHTML = '';
+
+  DATA.areas.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = a.name;
+    select.appendChild(opt);
+  });
+}
+
+function updateCircle(present, total) {
+  console.log('Presence:', present, '/', total);
+}
+
+function reloadData() {
+  fetch('http://localhost:3000/api/data')
+    .then(res => res.json())
+    .then(data => {
+      DATA = data;
+
+      render();
+      renderAreas();
+      initAreaDropdown();
+
+      updateCircle(
+        DATA.people.filter(p => p.present).length,
+        DATA.people.length
+      );
+
+      updateLastUpdated(DATA.lastUpdated);
+    })
+    .catch(err => console.error('FETCH ERROR:', err));
+}
+
+function init() {
+  reloadData();
+  setInterval(reloadData, 2000);
+}
+
+window.onload = init;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Group Assignment Map</title>
+  <style>
+    /* Reset and Layout Fix */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6f8;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Banner */
+    .top-banner {
+      width: 100%;
+      background: linear-gradient(90deg, #0cff34d5, #05920c);
+      color: white;
+      font-size: 36px;
+      font-weight: 700;
+      text-align: center;
+      padding: 20px 0;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+    }
+
+    /* Container for the rest of the app */
+    .app-container {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      gap: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      color: #1e293b;
+      font-size: 24px;
+    }
+
+    .status-text {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    /* SPLIT LAYOUT */
+    .layout {
+      display: flex;
+      gap: 20px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* LEFT SIDEBAR */
+    .sidebar {
+      width: 400px; /* Expanded to fit three dropdowns */
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 12px 16px;
+      background: #f0fff2;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-left: 4px solid #46eb25;
+    }
+
+    .sidebar-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-title {
+      font-weight: 600;
+      color: #335540;
+      font-size: 14px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .status-filter {
+      flex: 1;
+      padding: 4px 4px;
+      border-radius: 6px;
+      border: 1px solid #25eb35;
+      font-size: 10px; /* Reduced slightly for fit */
+      color: #25eb25;
+      background: white;
+      outline: none;
+      font-weight: bold;
+    }
+
+    .people-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .employee-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: grab;
+      transition: 0.2s;
+      position: relative;
+    }
+
+    .employee-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    .emp-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      object-fit: cover;
+    }
+
+    .emp-info { flex: 1; }
+    .emp-name { font-weight: 600; color: #1e293b; font-size: 15px; }
+    .emp-area { font-size: 12px; color: #64748b; }
+
+    /* MAIN MAP AREA */
+    .main-content {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #mapWrapper {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      display: inline-block;
+    }
+
+    #layoutImg {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* AREA MARKERS */
+    .area-marker {
+      position: absolute;
+      background: rgba(30, 41, 59, 0.9);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      text-align: center;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 10;
+      min-width: 110px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .area-marker b {
+      display: block;
+      color: #f1c40f;
+      margin-bottom: 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 4px;
+      font-size: 13px;
+    }
+
+    /* WORKER ROW AND DOT STYLING */
+    .worker-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 2px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .worker-row:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .status-dot.green {
+      background: radial-gradient(circle at 3px 3px, #58ff85, #0a8f3c);
+    }
+
+    .status-dot.red {
+      background: radial-gradient(circle at 3px 3px, #ff8585, #d93025);
+    }
+
+    /* Dot in sidebar card */
+    .sidebar-dot {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+
+    .area-marker.drag-over {
+      background: rgba(37, 99, 235, 1);
+      transform: translate(-50%, -50%) scale(1.1);
+      border-color: #fff;
+    }
+
+    #mockWarning {
+      display: none; 
+      background: #fee2e2; 
+      color: #991b1b; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin-bottom: 15px; 
+      border: 1px solid #fecaca;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-banner">MER-C HENKATEN BOARD</div>
+
+  <div class="app-container">
+    <div id="mockWarning">
+      ⚠️ BACKEND ERROR: The server returned NO DATA or is unreachable. Check your terminal for Syntax Errors!
+    </div>
+
+    <div class="header">
+      <h1>Group Assignment Map</h1>
+      <div class="status-text">
+        Last Updated: <span id="lastUpdatedText">-</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-header-top">
+            <div class="sidebar-title">Employee List</div>
+          </div>
+          <div class="filter-group">
+            <select id="shiftDropdown" class="status-filter" onchange="renderUI(DATA)">
+              <option value="all">All Shifts</option>
+              <option value="1">Shift 1</option>
+              <option value="2">Shift 2</option>
+            </select>
+            <select id="filterDropdown" class="status-filter" onchange="renderUI(DATA)">
+              <option value="all">All Tasking</option>
+              <option value="idle">Idle Only</option>
+              <option value="assigned">Assigned Only</option>
+            </select>
+            <select id="presenceDropdown" class="status-filter" onchange="renderUI(DATA)">
+              <option value="all">All Presence</option>
+              <option value="present">Present Only</option>
+              <option value="absent">Absent Only</option>
+            </select>
+          </div>
+        </div>
+        <div class="people-list" id="peopleList"></div>
+      </div>
+
+      <div class="main-content">
+        <div id="mapWrapper">
+          <img id="layoutImg" src="images/layout.png">
+          <div id="markerLayer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var FALLBACK_AVATAR = "images/0Br.png";
+    var DATA = { people: [], areas: [] };
+
+    function ajax(url, method, payload, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.open(method || 'GET', url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { callback(null, JSON.parse(xhr.responseText)); } catch(e) { callback(e); }
+          } else { callback(new Error('Status: ' + xhr.status)); }
+        }
+      };
+      xhr.send(payload ? JSON.stringify(payload) : null);
+    }
+
+    function reloadData() {
+      ajax('/api/data', 'GET', null, function(err, data) {
+        var warning = document.getElementById('mockWarning');
+        if (err || !data || !data.people) {
+          warning.style.display = 'block';
+          return;
+        }
+        warning.style.display = 'none';
+        DATA = data;
+        renderUI(data);
+      });
+    }
+
+    function performMove(userId, targetAreaId) {
+      ajax('/api/move', 'POST', { id: userId, areaId: targetAreaId }, function(err) {
+        if (!err) reloadData();
+      });
+    }
+
+    function renderUI(data) {
+      var lastUpdatedText = document.getElementById('lastUpdatedText');
+      if (lastUpdatedText) {
+        lastUpdatedText.innerText = new Date(data.lastUpdated).toLocaleString();
+      }
+
+      var filterValue = document.getElementById('filterDropdown').value;
+      var shiftValue = document.getElementById('shiftDropdown').value;
+      var presenceValue = document.getElementById('presenceDropdown').value;
+
+      // Sidebar Rendering
+      var list = document.getElementById('peopleList');
+      list.innerHTML = '';
+      for (var i = 0; i < data.people.length; i++) {
+        var p = data.people[i];
+        
+        // 1. Shift Filter
+        if (shiftValue !== 'all') {
+          if (!p.shift || String(p.shift) !== shiftValue) continue;
+        }
+
+        // 2. Tasking Status Filter (Idle/Assigned)
+        var isAssigned = (p.areas && p.areas.length > 0 && p.areas[0] !== "" && p.areas[0] !== null);
+        if (filterValue === 'idle' && isAssigned) continue;
+        if (filterValue === 'assigned' && !isAssigned) continue;
+
+        // 3. Presence Filter
+        if (presenceValue === 'present' && !p.present) continue;
+        if (presenceValue === 'absent' && p.present) continue;
+
+        var areaName = 'Idle';
+        if (isAssigned) {
+          for (var j = 0; j < data.areas.length; j++) {
+            if (data.areas[j].id === p.areas[0]) areaName = data.areas[j].name;
+          }
+        }
+
+        var card = document.createElement('div');
+        card.className = 'employee-card';
+        card.setAttribute('draggable', 'true');
+        
+        (function(id) {
+          card.ondragstart = function(e) { e.dataTransfer.setData('text/plain', id); };
+        })(p.id);
+
+        var dotClass = p.present ? 'green' : 'red';
+        var shiftLabel = p.shift ? ' | S' + p.shift : '';
+
+        card.innerHTML = '<img src="' + p.avatar + '" class="emp-avatar" onerror="this.src=\'' + FALLBACK_AVATAR + '\'">' +
+          '<div class="emp-info"><div class="emp-name">' + p.name + '</div>' +
+          '<div class="emp-area">' + areaName + shiftLabel + '</div></div>' +
+          '<span class="status-dot ' + dotClass + ' sidebar-dot"></span>' +
+          '<div style="color: #cbd5e1; margin-left: 10px;">⋮⋮</div>';
+        list.appendChild(card);
+      }
+
+      // Map Markers Rendering
+      var layer = document.getElementById('markerLayer');
+      layer.innerHTML = '';
+      for (var k = 0; k < data.areas.length; k++) {
+        var area = data.areas[k];
+        var marker = document.createElement('div');
+        marker.className = 'area-marker';
+        
+        var occsHtml = '';
+        for (var m = 0; m < data.people.length; m++) {
+          var person = data.people[m];
+          
+          // Apply Shift Filter to Map
+          if (shiftValue !== 'all' && (!person.shift || String(person.shift) !== shiftValue)) continue;
+
+          // Apply Presence Filter to Map
+          if (presenceValue === 'present' && !person.present) continue;
+          if (presenceValue === 'absent' && person.present) continue;
+
+          // Determine status for this person
+          var isPersAssigned = (person.areas && person.areas.length > 0 && person.areas[0] !== "" && person.areas[0] !== null);
+          
+          // Check if person matches the global filter
+          if (filterValue === 'idle' && isPersAssigned) continue;
+          if (filterValue === 'assigned' && !isPersAssigned) continue;
+
+          // Check if person is actually in this specific area
+          if (person.areas.indexOf(area.id) !== -1) {
+            var dotColor = person.present ? 'green' : 'red';
+            occsHtml += '<div class="worker-row" title="Double-click to remove" ondblclick="performMove(\'' + person.id + '\', \'\')">' +
+                          '<span>' + person.name + '</span>' +
+                          '<span class="status-dot ' + dotColor + '"></span>' +
+                        '</div>';
+          }
+        }
+
+        // POSITIONING LOGIC
+        var posX = 50, posY = 50;
+        if (area.layout) {
+          posX = area.layout.x;
+          posY = area.layout.y;
+        }
+        
+        marker.style.left = posX + '%';
+        marker.style.top = posY + '%';
+        if (area.layout && area.layout.size) marker.style.width = area.layout.size + 'px';
+
+        marker.innerHTML = '<b>' + area.name + '</b>' + (occsHtml || '<span style="color:#94a3b8;">Empty</span>');
+
+        (function(mkr, aId) {
+          mkr.ondragover = function(e) { e.preventDefault(); mkr.classList.add('drag-over'); };
+          mkr.ondragleave = function() { mkr.classList.remove('drag-over'); };
+          mkr.ondrop = function(e) {
+            e.preventDefault();
+            mkr.classList.remove('drag-over');
+            var userId = e.dataTransfer.getData('text/plain');
+            if (userId) performMove(userId, aId);
+          };
+        })(marker, area.id);
+
+        layer.appendChild(marker);
+      }
+    }
+
+    window.onload = function() { 
+      reloadData(); 
+      setInterval(reloadData, 3000); 
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,507 @@
+{
+  "lastUpdated": "2026-05-04T08:21:41.774Z",
+  "dailyLogs": [
+    {
+      "date": "26/04/2026",
+      "presentCount": 21,
+      "totalCount": 26,
+      "percentage": 81,
+      "message": "81% of all employees were present at 26/04/2026"
+    },
+    {
+      "date": "27/04/2026",
+      "presentCount": 24,
+      "totalCount": 26,
+      "percentage": 92,
+      "message": "92% of all employees were present at 27/04/2026"
+    },
+    {
+      "date": "28/04/2026",
+      "presentCount": 22,
+      "totalCount": 26,
+      "percentage": 85,
+      "message": "85% of all employees were present at 28/04/2026"
+    }
+  ],
+  "people": [
+    {
+      "id": "p1",
+      "name": "John",
+      "role": "Supervisor",
+      "areas": [
+        "a7"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/1B.png",
+      "logs": []
+    },
+    {
+      "id": "p2",
+      "name": "Sarah",
+      "role": "QC",
+      "areas": [],
+      "shift": 2,
+      "present": true,
+      "avatar": "images/1O.png",
+      "logs": [
+        {
+          "time": "2026-05-04T01:16:05.676Z",
+          "action": "Checked IN"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "name": "Mike",
+      "role": "Operator",
+      "areas": [],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/1R.png",
+      "logs": []
+    },
+    {
+      "id": "p4",
+      "name": "Anna",
+      "role": "Operator",
+      "areas": [
+        "a10"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/1Y.png",
+      "logs": []
+    },
+    {
+      "id": "p5",
+      "name": "David",
+      "role": "Operator",
+      "areas": [
+        ""
+      ],
+      "shift": 1,
+      "present": false,
+      "avatar": "images/2B.png",
+      "logs": [
+        {
+          "time": "2026-04-30T08:44:44.030Z",
+          "action": "Moved to a3"
+        },
+        {
+          "time": "2026-04-30T08:45:22.024Z",
+          "action": "Checked OUT"
+        },
+        {
+          "time": "2026-05-04T08:03:06.343Z",
+          "action": "Moved to "
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "name": "Lisa",
+      "role": "Operator",
+      "areas": [
+        "a2"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/2O.png",
+      "logs": []
+    },
+    {
+      "id": "p7",
+      "name": "Tom",
+      "role": "Operator",
+      "areas": [],
+      "shift": 2,
+      "present": true,
+      "avatar": "images/2R.png",
+      "logs": []
+    },
+    {
+      "id": "p8",
+      "name": "Nina",
+      "role": "Operator",
+      "areas": [
+        ""
+      ],
+      "shift": 2,
+      "present": true,
+      "avatar": "images/2Y.png",
+      "logs": [
+        {
+          "time": "2026-05-04T04:37:01.602Z",
+          "action": "Moved to "
+        }
+      ]
+    },
+    {
+      "id": "p9",
+      "name": "Chris",
+      "role": "Operator",
+      "areas": [
+        "a10"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/3B.png",
+      "logs": []
+    },
+    {
+      "id": "p10",
+      "name": "Ella",
+      "role": "Operator",
+      "areas": [
+        "a2"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/3O.png",
+      "logs": []
+    },
+    {
+      "id": "p11",
+      "name": "Ryan",
+      "role": "Operator",
+      "areas": [
+        "a5"
+      ],
+      "shift": 2,
+      "present": true,
+      "avatar": "images/3R.png",
+      "logs": []
+    },
+    {
+      "id": "p12",
+      "name": "Dina",
+      "role": "Operator",
+      "areas": [
+        "a8"
+      ],
+      "shift": 2,
+      "present": true,
+      "avatar": "images/3Y.png",
+      "logs": []
+    },
+    {
+      "id": "p13",
+      "name": "Kevin",
+      "role": "Operator",
+      "areas": [
+        "a3"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/4B.png",
+      "logs": [
+        {
+          "time": "2026-05-04T05:46:04.990Z",
+          "action": "Moved to a3"
+        }
+      ]
+    },
+    {
+      "id": "p14",
+      "name": "Sophie",
+      "role": "Operator",
+      "areas": [
+        "a5"
+      ],
+      "shift": 2,
+      "present": true,
+      "avatar": "images/4O.png",
+      "logs": []
+    },
+    {
+      "id": "p15",
+      "name": "Arif",
+      "role": "Operator",
+      "areas": [],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/4R.png",
+      "logs": []
+    },
+    {
+      "id": "p16",
+      "name": "Budi",
+      "role": "Operator",
+      "areas": [
+        "a6"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/4Y.png",
+      "logs": []
+    },
+    {
+      "id": "p17",
+      "name": "Rina",
+      "role": "Operator",
+      "areas": [
+        "a7"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/5B.png",
+      "logs": []
+    },
+    {
+      "id": "p18",
+      "name": "Agus",
+      "role": "Operator",
+      "areas": [
+        "a4"
+      ],
+      "shift": 2,
+      "present": true,
+      "avatar": "images/5O.png",
+      "logs": []
+    },
+    {
+      "id": "p19",
+      "name": "Fajar",
+      "role": "Operator",
+      "areas": [
+        "a7"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/5R.png",
+      "logs": [
+        {
+          "time": "2026-05-04T08:05:22.602Z",
+          "action": "Checked OUT"
+        },
+        {
+          "time": "2026-05-04T08:05:24.511Z",
+          "action": "Checked IN"
+        },
+        {
+          "time": "2026-05-04T08:05:30.720Z",
+          "action": "Moved to a7"
+        },
+        {
+          "time": "2026-05-04T08:21:41.049Z",
+          "action": "Shift changed to 2"
+        },
+        {
+          "time": "2026-05-04T08:21:41.774Z",
+          "action": "Shift changed to 1"
+        }
+      ]
+    },
+    {
+      "id": "p20",
+      "name": "Putri",
+      "role": "Operator",
+      "areas": [],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/5Y.png",
+      "logs": []
+    },
+    {
+      "id": "p21",
+      "name": "Hadi",
+      "role": "Operator",
+      "areas": [
+        "a1"
+      ],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/6B.png",
+      "logs": []
+    },
+    {
+      "id": "p22",
+      "name": "Lina",
+      "role": "Operator",
+      "areas": [
+        "a9"
+      ],
+      "shift": 2,
+      "present": true,
+      "avatar": "images/6O.png",
+      "logs": [
+        {
+          "time": "2026-05-04T04:37:11.943Z",
+          "action": "Moved to a9"
+        }
+      ]
+    },
+    {
+      "id": "p23",
+      "name": "Yusuf",
+      "role": "Operator",
+      "areas": [],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/6R.png",
+      "logs": []
+    },
+    {
+      "id": "p24",
+      "name": "Maya",
+      "role": "Operator",
+      "areas": [],
+      "shift": 1,
+      "present": true,
+      "avatar": "images/6Y.png",
+      "logs": []
+    },
+    {
+      "id": "p25",
+      "name": "Dewi",
+      "role": "Operator",
+      "areas": [],
+      "shift": 2,
+      "present": false,
+      "avatar": "images/CXP.png",
+      "logs": []
+    },
+    {
+      "id": "p26",
+      "name": "Rizal",
+      "role": "Operator",
+      "areas": [
+        ""
+      ],
+      "shift": 2,
+      "present": false,
+      "avatar": "images/0Br.png",
+      "logs": [
+        {
+          "time": "2026-05-04T08:03:07.030Z",
+          "action": "Moved to "
+        }
+      ]
+    }
+  ],
+  "areas": [
+    {
+      "id": "a1",
+      "name": "Assembly",
+      "x": 55,
+      "y": 45,
+      "layout": {
+        "x": 55.4,
+        "y": 55.1,
+        "size": 100
+      }
+    },
+    {
+      "id": "a2",
+      "name": "Mold Making",
+      "x": 76,
+      "y": 12,
+      "layout": {
+        "x": 78.8,
+        "y": 11,
+        "size": 100
+      }
+    },
+    {
+      "id": "a3",
+      "name": "QC Room",
+      "x": 62,
+      "y": 70,
+      "layout": {
+        "x": 61,
+        "y": 70,
+        "size": 100
+      }
+    },
+    {
+      "id": "a4",
+      "name": "Warehouse",
+      "x": 86,
+      "y": 30,
+      "layout": {
+        "x": 84.3,
+        "y": 27.7,
+        "size": 100
+      }
+    },
+    {
+      "id": "a5",
+      "name": "Welding",
+      "x": 23,
+      "y": 12,
+      "layout": {
+        "x": 23,
+        "y": 13.3,
+        "size": 100
+      }
+    },
+    {
+      "id": "a6",
+      "name": "Sub-Assy",
+      "x": 55,
+      "y": 13,
+      "layout": {
+        "x": 53,
+        "y": 15.3,
+        "size": 100
+      }
+    },
+    {
+      "id": "a7",
+      "name": "Injection",
+      "x": 32,
+      "y": 40,
+      "layout": {
+        "x": 32.6,
+        "y": 39,
+        "size": 100
+      }
+    },
+    {
+      "id": "a8",
+      "name": "Conversion",
+      "x": 13,
+      "y": 70,
+      "layout": {
+        "x": 17.5,
+        "y": 63.1,
+        "size": 100
+      }
+    },
+    {
+      "id": "a9",
+      "name": "Injection 2",
+      "x": 74,
+      "y": 54,
+      "layout": {
+        "x": 74.1,
+        "y": 50,
+        "size": 100
+      }
+    },
+    {
+      "id": "a10",
+      "name": "Oasis",
+      "x": 43,
+      "y": 34,
+      "layout": {
+        "x": 43.2,
+        "y": 35.8,
+        "size": 100
+      }
+    }
+  ],
+  "organization": [
+    {
+      "id": "p1",
+      "children": [
+        "p2",
+        "p3",
+        "p4",
+        "p5",
+        "p6"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Control Panel</title>
+
+  <style>
+    /* 1. FORCE EDGE-TO-EDGE RESET */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100%;
+      height: 100%;
+      background: #f4f6f8;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 2. FULL-WIDTH HEADER BANNER */
+    .top-banner {
+      display: block;
+      width: 100%;
+      background: linear-gradient(90deg, #0c6dffd5, #054792);
+      color: white;
+      font-size: 36px;
+      font-weight: 700;
+      text-align: center;
+      padding: 20px 0;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+      border: none;
+    }
+
+    /* 3. CONTENT CONTAINER */
+    .app-container {
+      padding: 20px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .header {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+      text-align: right;
+    }
+
+    .dashboard h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    /* Presence Circle */
+    .stats-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .circle-wrap {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: #e9ecef;
+      position: relative;
+      transition: background 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .circle-inner {
+      width: 86px;
+      height: 86px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 22px;
+      color: #1e293b;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .stats-info { display: flex; flex-direction: column; }
+    .stats-info span { font-size: 14px; color: #555; }
+
+    /* DAILY LOGS TABLE */
+    .logs-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .logs-section h2 { margin-top: 0; font-size: 20px; margin-bottom: 15px; color: #1e293b; }
+    .log-table { width: 100%; border-collapse: collapse; }
+    .log-table th, .log-table td { text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    .log-table th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 14px; }
+    .log-table td { color: #334155; font-size: 14px; }
+    .log-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+
+    /* GRID LAYOUT */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* CARD */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      object-fit: cover;
+    }
+
+    .card-header-info { display: flex; flex-direction: column; }
+    .card-header-info b { font-size: 18px; color: #1e293b; }
+    .role { font-size: 13px; color: #64748b; }
+
+    .status { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    .present { color: #0a8f3c; }
+    .absent { color: #d93025; }
+
+    /* area and shift */
+    .area { font-size: 14px; color: #475569; margin-bottom: 4px; }
+    .shift-period { font-size: 14px; color: #475569; margin-bottom: 15px; }
+    .idle { color: #94a3b8; font-style: italic; }
+
+    .btn-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    button {
+      flex: 1;
+      padding: 8px 4px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-toggle { background: #eff6ff; color: #2563eb; }
+    .btn-toggle:hover { background: #dbeafe; }
+    
+    .btn-shift { background: #fff7ed; color: #ea580c; }
+    .btn-shift:hover { background: #ffedd5; }
+
+    .btn-move { background: #f1f5f9; color: #475569; }
+    .btn-move:hover { background: #e2e8f0; }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      width: 300px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h3 { margin-top: 0; margin-bottom: 15px; }
+    .modal-content select { width: 100%; padding: 8px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #ccc; }
+    .modal-actions { text-align: right; }
+    .modal-actions button { margin-left: 10px; flex: none; }
+    .modal-actions .btn-toggle { background: #2563eb; color: white; }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-banner">MER-C CONTROL PANEL</div>
+
+  <div class="app-container">
+    <div class="header">
+      Last Updated: <span id="lastUpdatedText">-</span>
+    </div>
+
+    <div class="dashboard">
+      <h1>Control Panel</h1>
+
+      <!-- Stats Section -->
+      <div class="stats-card">
+        <div id="presenceCircle" class="circle-wrap">
+          <div class="circle-inner">
+            <span id="percentText">0%</span>
+          </div>
+        </div>
+        <div class="stats-info">
+          <b>Presence</b>
+          <span id="countText">0/0 Present</span>
+        </div>
+      </div>
+
+      <!-- Daily Logs Table -->
+      <div class="logs-section">
+        <h2>Daily Presence Logs</h2>
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Summary</th>
+              <th>Present / Total</th>
+            </tr>
+          </thead>
+          <tbody id="dailyLogBody">
+            <tr><td colspan="3" style="text-align: center; color: #94a3b8;">No logs available</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="mockWarning" style="display: none; background: #fff3cd; color: #856404; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #ffeeba;">
+        <strong>Mock Mode Active:</strong> Backend disconnected. Using simulation.
+      </div>
+
+      <!-- People Grid -->
+      <div id="people" class="grid"></div>
+
+      <!-- Move Area Modal -->
+      <div id="areaModal" class="modal">
+        <div class="modal-content">
+          <h3>Move to Area</h3>
+          <select id="areaSelect"></select>
+
+          <div class="modal-actions">
+            <button class="btn-toggle" onclick="confirmMove()">Confirm</button>
+            <button class="btn-move" onclick="closeModal()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let DATA = { people: [], areas: [] };
+    let selectedUserId = null;
+    let isMockMode = false;
+
+    const FALLBACK_AVATAR = "images/0Br.png";
+
+    function updateLastUpdated(timestamp) {
+      const el = document.getElementById('lastUpdatedText');
+      if (!el) return;
+      el.innerText = timestamp ? new Date(timestamp).toLocaleString() : '-';
+    }
+
+    function init() {
+      reloadData();
+      setInterval(reloadData, 3000);
+    }
+
+    function reloadData() {
+      fetch('/api/data')
+        .then(res => res.json())
+        .then(data => handleData(data))
+        .catch(err => {
+          isMockMode = true;
+          const warning = document.getElementById('mockWarning');
+          if (warning) warning.style.display = 'block';
+        });
+    }
+
+    function handleData(data) {
+      if (!data || !Array.isArray(data.people)) return;
+      DATA = data; 
+      render(data);
+      renderLogTable(data.dailyLogs);
+      const presentCount = data.people.filter(p => p.present).length;
+      updateCircle(presentCount, data.people.length);
+      updateLastUpdated(data.lastUpdated);
+    }
+
+    function renderLogTable(logs) {
+      const tbody = document.getElementById('dailyLogBody');
+      if (!tbody) return;
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #94a3b8;">No logs.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = '';
+      [...logs].reverse().forEach(log => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><strong>${log.date}</strong></td><td>${log.message}</td><td><span class="log-badge">${log.presentCount} / ${log.totalCount}</span></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateCircle(present, total) {
+      if (!total) return;
+      const deg = (present / total) * 360;
+      const circle = document.getElementById('presenceCircle');
+      if (!circle) return;
+      circle.style.background = `conic-gradient(#0a8f3c 0deg ${deg}deg, #d93025 ${deg}deg 360deg)`;
+      document.getElementById('percentText').innerText = `${Math.round((present/total)*100)}%`;
+      document.getElementById('countText').innerText = `${present}/${total} Present`;
+    }
+
+    function render(data) {
+      const container = document.getElementById('people');
+      if (!container) return;
+      container.innerHTML = '';
+      data.people.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        const areaNames = (p.areas && p.areas.length > 0)
+          ? p.areas.map(id => data.areas.find(x => x.id === id)?.name || id).join(', ')
+          : '<span class="idle">IDLE</span>';
+
+        div.innerHTML = `
+          <div class="card-header">
+            <img src="${p.avatar || ''}" class="avatar" onerror="this.onerror=null; this.src='${FALLBACK_AVATAR}';">
+            <div class="card-header-info"><b>${p.name}</b><span class="role">${p.role || 'Operator'}</span></div>
+          </div>
+          <div class="status ${p.present ? 'present' : 'absent'}">${p.present ? 'Present' : 'Absent'}</div>
+          <div class="area">Area: ${areaNames}</div>
+          <div class="shift-period">Shift: ${p.shift || 1}</div>
+          <div class="btn-group">
+            <button class="btn-toggle" onclick="togglePresence('${p.id}')">Toggle Prescence</button>
+            <button class="btn-shift" onclick="toggleShift('${p.id}')">Toggle Shift</button>
+            <button class="btn-move" onclick="moveArea('${p.id}')">Move Area</button>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    function togglePresence(id) {
+      const person = DATA.people.find(x => x.id === id);
+      fetch('/api/presence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, present: !person.present })
+      }).then(() => reloadData());
+    }
+
+    function toggleShift(id) {
+      const person = DATA.people.find(x => x.id === id);
+      const newShift = person.shift === 1 ? 2 : 1;
+      fetch('/api/shift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, shift: newShift })
+      }).then(() => reloadData());
+    }
+
+    function moveArea(id) {
+      selectedUserId = id;
+      const select = document.getElementById('areaSelect');
+      select.innerHTML = '';
+      DATA.areas.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id; opt.textContent = a.name;
+        select.appendChild(opt);
+      });
+      document.getElementById('areaModal').style.display = 'flex';
+    }
+
+    function confirmMove() {
+      fetch('/api/move', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: selectedUserId, areaId: document.getElementById('areaSelect').value })
+      }).then(() => { closeModal(); reloadData(); });
+    }
+
+    function closeModal() { document.getElementById('areaModal').style.display = 'none'; }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
