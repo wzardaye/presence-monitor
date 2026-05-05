@@ -533,50 +533,36 @@
     </div>
   </div>
 
-  <script>
+<script>
     let DATA = {};
     let isManualMode = false;
     let currentShiftView = 'all'; 
     let currentStatusFilter = 'all';
 
+    // We keep MOCK_DATA just as a failsafe if the server is completely down
     const MOCK_DATA = {
-      "lastUpdated": "2026-05-04T05:46:04.990Z",
-      "dailyLogs": [
-        { "date": "26/04/2026", "message": "81% of all employees were present at 26/04/2026" },
-        { "date": "27/04/2026", "message": "92% of all employees were present at 27/04/2026" },
-        { "date": "28/04/2026", "message": "85% of all employees were present at 28/04/2026" }
-      ],
-      "people": [
-        { "id": "p1", "name": "John", "role": "Supervisor", "areas": ["a7"], "shift": 1, "present": true, "avatar": "https://ui-avatars.com/api/?name=John" },
-        { "id": "p2", "name": "Sarah", "role": "QC", "areas": [], "shift": 2, "present": true, "avatar": "https://ui-avatars.com/api/?name=Sarah" },
-        { "id": "p5", "name": "David", "role": "Operator", "areas": ["a3"], "shift": 1, "present": false, "avatar": "https://ui-avatars.com/api/?name=David", "absenceReason": "Sick Leave", "expectedReturn": "2026-05-05T08:00" },
-        { "id": "p25", "name": "Dewi", "role": "Operator", "areas": [], "shift": 1, "present": false, "avatar": "https://ui-avatars.com/api/?name=Dewi" },
-        { "id": "p26", "name": "Rizal", "role": "Operator", "areas": ["a3"], "shift": 2, "present": false, "avatar": "https://ui-avatars.com/api/?name=Rizal" }
-      ],
-      "areas": [
-        { "id": "a1", "name": "Assembly", "x": 55, "y": 45, "layout": { "size": 100 } },
-        { "id": "a2", "name": "Mold Making", "x": 76, "y": 12, "layout": { "size": 100 } },
-        { "id": "a3", "name": "QC Room", "x": 62, "y": 70, "layout": { "size": 100 } }
-      ]
+      "lastUpdated": new Date().toISOString(),
+      "dailyLogs": [],
+      "people": [],
+      "areas": []
     };
 
     window.onload = () => {
-      try {
-        fetch('http://localhost:3000/api/data')
-          .then(res => res.ok ? res.json() : Promise.reject())
-          .then(data => initData(data))
-          .catch(() => {
-            const savedData = localStorage.getItem('henkatenData_v4');
-            if (savedData) {
-              try { initData(JSON.parse(savedData)); } catch(e) { initData(MOCK_DATA); }
-            } else {
-              initData(MOCK_DATA);
-            }
-          });
-        startPolling();
-      } catch (err) {
-        console.error("INIT CRASH:", err);
-      }
+      // Fetch directly from your Vercel API
+      fetch('/api/data')
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => initData(data))
+        .catch(() => {
+          console.warn("Could not reach API. Falling back to local/mock data.");
+          const savedData = localStorage.getItem('henkatenData_v4');
+          if (savedData) {
+            try { initData(JSON.parse(savedData)); } catch(e) { initData(MOCK_DATA); }
+          } else {
+            initData(MOCK_DATA);
+          }
+        });
+      
+      startPolling();
     };
 
     function changeShiftView(val) {
@@ -663,7 +649,6 @@
         
         let absenceHtml = '';
         if (p.absenceReason || p.expectedReturn) {
-          // Changed return info to display explicitly on its own line beneath the reason
           absenceHtml = `<div class="absence-detail">
             <div style="font-weight: 500;">${p.absenceReason ? p.absenceReason : 'No reason given'}</div>
             ${p.expectedReturn ? '<div style="color: #555; margin-top: 2px;">Return: ' + new Date(p.expectedReturn).toLocaleString() + '</div>' : ''}
@@ -698,7 +683,6 @@
 
         let absenceSummary = '-';
         if (!p.present) {
-          // Displaying return date below the reason in the table cell as well
           const reason = p.absenceReason || 'No reason';
           const returnDate = p.expectedReturn ? `<div style="color: #777; margin-top: 2px;">Return: ${new Date(p.expectedReturn).toLocaleDateString()}</div>` : '';
           absenceSummary = `<div style="font-weight: 500;">${reason}</div>${returnDate}`;
@@ -721,7 +705,6 @@
       });
     }
 
-    // Modal Logic
     function openAbsenceModal(personId) {
       const person = DATA.people.find(p => p.id === personId);
       if (!person) return;
@@ -738,6 +721,7 @@
       document.getElementById('absenceModal').style.display = 'none';
     }
 
+    // Modal save currently saves locally. You can expand your backend later to save reasons!
     function saveAbsenceDetails() {
       const id = document.getElementById('targetPersonId').value;
       const reason = document.getElementById('absenceReasonInput').value;
@@ -750,29 +734,49 @@
         
         isManualMode = true;
         updateModeBadge();
-        saveAndSync();
+        saveToLocalStorageFallback();
       }
       closeAbsenceModal();
     }
 
-    function handleControlChange(personId, field, value) {
+    // NEW: Connects UI actions to your Vercel Backend
+    async function handleControlChange(personId, field, value) {
       isManualMode = true;
       updateModeBadge();
+      
       const person = DATA.people.find(p => p.id === personId);
       if (!person) return;
-      if (field === 'present') {
-        person.present = value;
-        // Optional: clear reason when they return
-        if (value) {
-          delete person.absenceReason;
-          delete person.expectedReturn;
+
+      try {
+        if (field === 'present') {
+          person.present = value;
+          if (value) {
+            delete person.absenceReason;
+            delete person.expectedReturn;
+          }
+          // Send to Backend
+          await fetch('/api/presence', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: personId, present: value })
+          });
+        } 
+        else if (field === 'area') {
+          person.areas = value === 'idle' ? [] : [value];
+          // Send to Backend
+          await fetch('/api/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: personId, areaId: value === 'idle' ? '' : value })
+          });
         }
+        saveToLocalStorageFallback(); // Update UI
+      } catch (error) {
+        console.error("Error communicating with server:", error);
       }
-      else if (field === 'area') person.areas = value === 'idle' ? [] : [value];
-      saveAndSync();
     }
 
-    function saveAndSync() {
+    function saveToLocalStorageFallback() {
       DATA.lastUpdated = new Date().toISOString();
       localStorage.setItem('henkatenData_v4', JSON.stringify(DATA));
       initData(DATA);
@@ -805,7 +809,8 @@
 
     function reloadData() {
       if (isManualMode) return;
-      fetch('http://localhost:3000/api/data')
+      // Fetch directly from your Vercel API
+      fetch('/api/data')
         .then(res => res.json())
         .then(data => initData(data))
         .catch(() => {});
@@ -917,7 +922,7 @@
 
     function startPolling() {
       reloadData();
-      setInterval(reloadData, 2000);
+      setInterval(reloadData, 2000); // Polls Vercel every 2 seconds
     }
   </script>
 </body>
