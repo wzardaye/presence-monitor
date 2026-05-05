@@ -172,8 +172,21 @@
     }
 
     /* NAVIGATION BAR */
+    .top-banner {
+      background: rgba(245, 185, 39, 0.96);
+      color: white; /* You can change this to #1e293b if you prefer dark text */
+      font-size: 36px;
+      font-weight: 700;
+      text-align: center;
+      padding: 20px 0;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 100;
+      border: none;
+    }
+
     .nav-bar {
-      background: ##f5b927f5;
+      background: rgba(245, 185, 39, 0.96);
       display: flex;
       justify-content: center;
       gap: 20px;
@@ -192,13 +205,12 @@
     }
 
     .nav-bar a:hover {
-      background: rgba(255, 225, 151, 0.96);
+      background: rgba(0, 0, 0, 0.1);
     }
     
-    /* Highlights the page you are currently on */
     .nav-bar a.active {
-      background: rgba(255, 255, 255, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(0, 0, 0, 0.2);
     }
 
     /* Tables */
