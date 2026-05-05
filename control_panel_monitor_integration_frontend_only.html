@@ -289,7 +289,7 @@
     </div>
   </div>
 
-  <script>
+<script>
     let DATA = { people: [], areas: [] };
     let selectedUserId = null;
     let isMockMode = false;
@@ -304,25 +304,38 @@
 
     function init() {
       reloadData();
+      // Polls the Vercel edge network every 3 seconds for live updates
       setInterval(reloadData, 3000);
     }
 
     function reloadData() {
       fetch('/api/data')
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error("API not reachable");
+          return res.json();
+        })
         .then(data => handleData(data))
         .catch(err => {
           isMockMode = true;
           const warning = document.getElementById('mockWarning');
           if (warning) warning.style.display = 'block';
+          console.error("Fetch error:", err);
         });
     }
 
     function handleData(data) {
       if (!data || !Array.isArray(data.people)) return;
+      
+      // Hide warning if we reconnected
+      if (isMockMode) {
+        isMockMode = false;
+        document.getElementById('mockWarning').style.display = 'none';
+      }
+
       DATA = data; 
       render(data);
       renderLogTable(data.dailyLogs);
+      
       const presentCount = data.people.filter(p => p.present).length;
       updateCircle(presentCount, data.people.length);
       updateLastUpdated(data.lastUpdated);
@@ -331,14 +344,20 @@
     function renderLogTable(logs) {
       const tbody = document.getElementById('dailyLogBody');
       if (!tbody) return;
+      
       if (!logs || logs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #94a3b8;">No logs.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #94a3b8;">No logs available.</td></tr>';
         return;
       }
+      
       tbody.innerHTML = '';
       [...logs].reverse().forEach(log => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><strong>${log.date}</strong></td><td>${log.message}</td><td><span class="log-badge">${log.presentCount} / ${log.totalCount}</span></td>`;
+        // Matches the { date, message } format from the main dashboard / backend
+        tr.innerHTML = `
+          <td><strong>${log.date}</strong></td>
+          <td colspan="2">${log.message}</td>
+        `;
         tbody.appendChild(tr);
       });
     }
@@ -373,9 +392,9 @@
           <div class="area">Area: ${areaNames}</div>
           <div class="shift-period">Shift: ${p.shift || 1}</div>
           <div class="btn-group">
-            <button class="btn-toggle" onclick="togglePresence('${p.id}')">Toggle Prescence</button>
+            <button class="btn-toggle" onclick="togglePresence('${p.id}')">Toggle Presence</button>
             <button class="btn-shift" onclick="toggleShift('${p.id}')">Toggle Shift</button>
-            <button class="btn-move" onclick="moveArea('${p.id}')">Move Area</button>
+            <button class="btn-move" onclick="moveArea('${p.id}')">Move</button>
           </div>`;
         container.appendChild(div);
       });
@@ -387,7 +406,9 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, present: !person.present })
-      }).then(() => reloadData());
+      })
+      .then(() => reloadData())
+      .catch(err => console.error("Failed to update presence", err));
     }
 
     function toggleShift(id) {
@@ -397,30 +418,45 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, shift: newShift })
-      }).then(() => reloadData());
+      })
+      .then(() => reloadData())
+      .catch(err => console.error("Failed to update shift", err));
     }
 
     function moveArea(id) {
       selectedUserId = id;
       const select = document.getElementById('areaSelect');
-      select.innerHTML = '';
+      
+      // Fixed: Added the Idle/Unassigned option
+      select.innerHTML = '<option value="">-- Idle / Unassigned --</option>'; 
+      
       DATA.areas.forEach(a => {
         const opt = document.createElement('option');
-        opt.value = a.id; opt.textContent = a.name;
+        opt.value = a.id; 
+        opt.textContent = a.name;
         select.appendChild(opt);
       });
+      
       document.getElementById('areaModal').style.display = 'flex';
     }
 
     function confirmMove() {
+      const selectedArea = document.getElementById('areaSelect').value;
       fetch('/api/move', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: selectedUserId, areaId: document.getElementById('areaSelect').value })
-      }).then(() => { closeModal(); reloadData(); });
+          body: JSON.stringify({ id: selectedUserId, areaId: selectedArea })
+      })
+      .then(() => { 
+        closeModal(); 
+        reloadData(); 
+      })
+      .catch(err => console.error("Failed to move area", err));
     }
 
-    function closeModal() { document.getElementById('areaModal').style.display = 'none'; }
+    function closeModal() { 
+      document.getElementById('areaModal').style.display = 'none'; 
+    }
 
     window.onload = init;
   </script>
