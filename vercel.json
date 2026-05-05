@@ -17,18 +17,4 @@
       "destination": "/workplace_presence_monitor_website.html"
     }
   ]
-}{
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index.js"
-    }
-  ]
 }
