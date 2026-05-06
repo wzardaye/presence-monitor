@@ -600,20 +600,8 @@
     };
 
     window.onload = () => {
-      // Fetch initial data correctly on page load
-      fetch('/api/data?t=' + new Date().getTime())
-        .then(res => res.ok ? res.json() : Promise.reject())
-        .then(data => initData(data))
-        .catch(() => {
-          console.warn("Could not reach API. Falling back to local/mock data.");
-          const savedData = localStorage.getItem('henkatenData_v4');
-          if (savedData) {
-            try { initData(JSON.parse(savedData)); } catch(e) { initData(MOCK_DATA); }
-          } else {
-            initData(MOCK_DATA);
-          }
-        });
-      
+      // FIX 1: Prevent double-fetching on load. 
+      // startPolling() handles both the initial load and the timer!
       startPolling();
     };
 
@@ -773,7 +761,6 @@
       document.getElementById('absenceModal').style.display = 'none';
     }
 
-    // FIX: Send the saved reason directly to the Vercel API
     async function saveAbsenceDetails() {
       const id = document.getElementById('targetPersonId').value;
       const reason = document.getElementById('absenceReasonInput').value;
@@ -869,16 +856,46 @@
 
     function updateModeBadge() {
       const badge = document.getElementById('modeBadge');
-      badge.className = isManualMode ? 'mode-indicator' : 'mode-indicator mode-live';
-      badge.innerText = isManualMode ? 'MANUAL / LOCAL OVERRIDE' : 'LIVE API MODE';
+      if(badge) {
+        badge.className = isManualMode ? 'mode-indicator' : 'mode-indicator mode-live';
+        badge.innerText = isManualMode ? 'MANUAL / LOCAL OVERRIDE' : 'LIVE API MODE';
+      }
     }
 
+    // FIX 2: Added deep error inspection to reloadData
     function reloadData() {
       if (isManualMode) return;
       fetch('/api/data?t=' + new Date().getTime())
-        .then(res => res.json())
+        .then(async res => {
+          // If Vercel throws an error (like a 500 crash or 404), catch it here!
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Server returned ${res.status}: ${errText.substring(0, 100)}`);
+          }
+          // If Vercel accidentally returns an HTML page instead of JSON, catch it here!
+          const contentType = res.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            const errText = await res.text();
+            throw new Error(`Expected JSON but got HTML. Response: ${errText.substring(0, 100)}`);
+          }
+          return res.json();
+        })
         .then(data => initData(data))
-        .catch(() => {});
+        .catch((err) => {
+          // THIS will print the true error to your console so we can debug it
+          console.error("🔴 API FETCH FAILED:", err.message);
+          
+          // Only fallback to Mock Data if the screen is currently completely empty
+          if (!DATA.people || DATA.people.length === 0) {
+            console.warn("Could not reach API. Falling back to local/mock data.");
+            const savedData = localStorage.getItem('henkatenData_v4');
+            if (savedData) {
+              try { initData(JSON.parse(savedData)); } catch(e) { initData(MOCK_DATA); }
+            } else {
+              initData(MOCK_DATA);
+            }
+          }
+        });
     }
 
     function initAreaDropdown() {
@@ -946,9 +963,14 @@
       if (total === 0) return;
       const deg = (present / total) * 360;
       const circle = document.getElementById('presenceCircle');
-      circle.style.background = `conic-gradient(#05920c 0deg ${deg}deg, #e74c3c ${deg}deg 360deg)`;
-      document.getElementById('percentText').innerText = `${Math.round((present / total) * 100)}%`;
-      document.getElementById('countText').innerText = `${present}/${total}`;
+      if(circle) {
+        circle.style.background = `conic-gradient(#05920c 0deg ${deg}deg, #e74c3c ${deg}deg 360deg)`;
+      }
+      const pText = document.getElementById('percentText');
+      if(pText) pText.innerText = `${Math.round((present / total) * 100)}%`;
+      
+      const cText = document.getElementById('countText');
+      if(cText) cText.innerText = `${present}/${total}`;
       renderLogTable();
     }
 
@@ -989,6 +1011,6 @@
       reloadData();
       setInterval(reloadData, 3000); 
     }
-  </script>
+</script>
 </body>
 </html>
