@@ -442,16 +442,31 @@
       const person = DATA.people.find(x => x.id === id);
       if (!person) return;
       
+      let reasonText = "";
+      
+      // If they are currently present, they are about to be marked absent. Ask for reason!
+      if (person.present) {
+        reasonText = prompt("Please enter a reason for absence:");
+        // If they click Cancel on the prompt, abort the update entirely
+        if (reasonText === null) return; 
+      }
+
       // Instant Screen Update
       person.present = !person.present;
+      person.reason = reasonText; // Temporarily save to local memory for UI
+      
       render(DATA);
       updateCircle(DATA.people.filter(p => p.present).length, DATA.people.length);
 
-      // Quiet Background Sync
+      // Quiet Background Sync with the Reason included
       fetch('/api/presence', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, present: person.present })
+        body: JSON.stringify({ 
+          id: id, 
+          present: person.present,
+          reason: reasonText 
+        })
       }).catch(err => console.error("Update failed", err));
     }
 
