@@ -601,10 +601,20 @@
 
     window.onload = () => {
       // Fetch directly from your Vercel API
-      fetch('/api/data')
-        .then(res => res.ok ? res.json() : Promise.reject())
-        .then(data => initData(data))
-        .catch(() => {
+      fetch('/api/presence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id: personId,
+          present: false, 
+          reason: absenceReasonText
+        })
+      })
+      .then(res => {
+         if (!res.ok) throw new Error("API failed to update");
+         return res.json();
+      })
+      .then(() => {
           console.warn("Could not reach API. Falling back to local/mock data.");
           const savedData = localStorage.getItem('henkatenData_v4');
           if (savedData) {
