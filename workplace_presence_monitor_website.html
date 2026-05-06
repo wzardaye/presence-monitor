@@ -600,21 +600,11 @@
     };
 
     window.onload = () => {
-      // Fetch directly from your Vercel API
-      fetch('/api/presence', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          id: personId,
-          present: false, 
-          reason: absenceReasonText
-        })
-      })
-      .then(res => {
-         if (!res.ok) throw new Error("API failed to update");
-         return res.json();
-      })
-      .then(() => {
+      // Fetch initial data correctly on page load
+      fetch('/api/data?t=' + new Date().getTime())
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => initData(data))
+        .catch(() => {
           console.warn("Could not reach API. Falling back to local/mock data.");
           const savedData = localStorage.getItem('henkatenData_v4');
           if (savedData) {
@@ -783,25 +773,41 @@
       document.getElementById('absenceModal').style.display = 'none';
     }
 
-    // Modal save currently saves locally. You can expand your backend later to save reasons!
-    function saveAbsenceDetails() {
+    // FIX: Send the saved reason directly to the Vercel API
+    async function saveAbsenceDetails() {
       const id = document.getElementById('targetPersonId').value;
       const reason = document.getElementById('absenceReasonInput').value;
       const returnDate = document.getElementById('expectedReturnInput').value;
       
       const person = DATA.people.find(p => p.id === id);
       if (person) {
+        // 1. Optimistic UI Update (Update screen instantly)
         person.absenceReason = reason;
         person.expectedReturn = returnDate;
+        person.present = false; 
         
         isManualMode = true;
         updateModeBadge();
         saveToLocalStorageFallback();
+        closeAbsenceModal();
+
+        // 2. Background Sync: Send reason to MongoDB
+        try {
+          await fetch('/api/presence', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              id: id, 
+              present: false, 
+              reason: reason 
+            })
+          });
+        } catch (error) {
+          console.error("Failed to save reason to database:", error);
+        }
       }
-      closeAbsenceModal();
     }
 
-    // NEW: Connects UI actions to your Vercel Backend
     async function handleControlChange(personId, field, value) {
       isManualMode = true;
       updateModeBadge();
@@ -816,16 +822,14 @@
             delete person.absenceReason;
             delete person.expectedReturn;
           }
-          // Send to Backend
           await fetch('/api/presence', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: personId, present: value })
+            body: JSON.stringify({ id: personId, present: value }) // Basic toggle doesn't send reason
           });
         } 
         else if (field === 'area') {
           person.areas = value === 'idle' ? [] : [value];
-          // Send to Backend
           await fetch('/api/move', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -871,8 +875,7 @@
 
     function reloadData() {
       if (isManualMode) return;
-      // Fetch directly from your Vercel API
-      fetch('/api/data')
+      fetch('/api/data?t=' + new Date().getTime())
         .then(res => res.json())
         .then(data => initData(data))
         .catch(() => {});
@@ -984,7 +987,7 @@
 
     function startPolling() {
       reloadData();
-      setInterval(reloadData, 2000); // Polls Vercel every 2 seconds
+      setInterval(reloadData, 3000); 
     }
   </script>
 </body>
