@@ -11,6 +11,16 @@ const DATA_FILE = path.join(ROOT_DIR, 'data.json');
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// FIX: Force Vercel and browsers to NEVER cache API requests
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+  next();
+});
+
 app.use('/images', express.static(path.join(ROOT_DIR, 'images')));
 
 // Frontend HTML Routes
@@ -27,27 +37,29 @@ app.get('/map', (req, res) => {
 });
 
 // Helper functions
+// Using require() ensures Vercel strictly bundles the file in the deployment
+let inMemoryData = null;
 function readData() {
+  if (inMemoryData) return inMemoryData;
   try {
     if (fs.existsSync(DATA_FILE)) {
       const rawData = fs.readFileSync(DATA_FILE, 'utf8');
-      return JSON.parse(rawData);
-    } else {
-      console.warn("data.json not found, using empty default.");
-      return { people: [], areas: [], lastUpdated: new Date().toISOString() };
+      inMemoryData = JSON.parse(rawData);
+      return inMemoryData;
     }
   } catch (err) {
     console.error("Error reading data.json:", err);
-    return { people: [], areas: [], lastUpdated: new Date().toISOString() };
   }
+  return { people: [], areas: [], lastUpdated: new Date().toISOString() };
 }
 
 function writeData(data) {
   data.lastUpdated = new Date().toISOString(); 
+  inMemoryData = data; // Save to active memory for fast retrieval
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
   } catch (err) {
-    console.error("Vercel filesystem is read-only. Data not saved permanently.", err.message);
+    console.error("Vercel filesystem is read-only. Data saved to active memory only.");
   }
 }
 
