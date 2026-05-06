@@ -352,12 +352,12 @@
 
     function init() {
       reloadData();
-      // Polls the Vercel edge network every 3 seconds for live updates
       setInterval(reloadData, 3000);
     }
 
     function reloadData() {
-      fetch('/api/data')
+      // FIX 1: Add timestamp to bypass Vercel Edge Caching forever
+      fetch('/api/data?t=' + new Date().getTime())
         .then(res => {
           if (!res.ok) throw new Error("API not reachable");
           return res.json();
@@ -367,23 +367,18 @@
           isMockMode = true;
           const warning = document.getElementById('mockWarning');
           if (warning) warning.style.display = 'block';
-          console.error("Fetch error:", err);
         });
     }
 
     function handleData(data) {
       if (!data || !Array.isArray(data.people)) return;
-      
-      // Hide warning if we reconnected
       if (isMockMode) {
         isMockMode = false;
         document.getElementById('mockWarning').style.display = 'none';
       }
-
       DATA = data; 
       render(data);
       renderLogTable(data.dailyLogs);
-      
       const presentCount = data.people.filter(p => p.present).length;
       updateCircle(presentCount, data.people.length);
       updateLastUpdated(data.lastUpdated);
@@ -392,20 +387,14 @@
     function renderLogTable(logs) {
       const tbody = document.getElementById('dailyLogBody');
       if (!tbody) return;
-      
       if (!logs || logs.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #94a3b8;">No logs available.</td></tr>';
         return;
       }
-      
       tbody.innerHTML = '';
       [...logs].reverse().forEach(log => {
         const tr = document.createElement('tr');
-        // Matches the { date, message } format from the main dashboard / backend
-        tr.innerHTML = `
-          <td><strong>${log.date}</strong></td>
-          <td colspan="2">${log.message}</td>
-        `;
+        tr.innerHTML = `<td><strong>${log.date}</strong></td><td colspan="2">${log.message}</td>`;
         tbody.appendChild(tr);
       });
     }
@@ -448,63 +437,72 @@
       });
     }
 
+    // FIX 2: Optimistic UI Updates! Update screen instantly, sync in background.
     function togglePresence(id) {
       const person = DATA.people.find(x => x.id === id);
+      if (!person) return;
+      
+      // Instant Screen Update
+      person.present = !person.present;
+      render(DATA);
+      updateCircle(DATA.people.filter(p => p.present).length, DATA.people.length);
+
+      // Quiet Background Sync
       fetch('/api/presence', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, present: !person.present })
-      })
-      .then(() => reloadData())
-      .catch(err => console.error("Failed to update presence", err));
+        body: JSON.stringify({ id, present: person.present })
+      }).catch(err => console.error("Update failed", err));
     }
 
     function toggleShift(id) {
       const person = DATA.people.find(x => x.id === id);
-      const newShift = person.shift === 1 ? 2 : 1;
+      if (!person) return;
+
+      // Instant Screen Update
+      person.shift = person.shift === 1 ? 2 : 1;
+      render(DATA);
+
+      // Quiet Background Sync
       fetch('/api/shift', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, shift: newShift })
-      })
-      .then(() => reloadData())
-      .catch(err => console.error("Failed to update shift", err));
+        body: JSON.stringify({ id, shift: person.shift })
+      }).catch(err => console.error("Update failed", err));
     }
 
     function moveArea(id) {
       selectedUserId = id;
       const select = document.getElementById('areaSelect');
-      
-      // Fixed: Added the Idle/Unassigned option
       select.innerHTML = '<option value="">-- Idle / Unassigned --</option>'; 
-      
       DATA.areas.forEach(a => {
         const opt = document.createElement('option');
-        opt.value = a.id; 
-        opt.textContent = a.name;
+        opt.value = a.id; opt.textContent = a.name;
         select.appendChild(opt);
       });
-      
       document.getElementById('areaModal').style.display = 'flex';
     }
 
     function confirmMove() {
       const selectedArea = document.getElementById('areaSelect').value;
+      const person = DATA.people.find(x => x.id === selectedUserId);
+      
+      if (person) {
+        // Instant Screen Update
+        person.areas = selectedArea ? [selectedArea] : [];
+        render(DATA);
+      }
+      closeModal();
+
+      // Quiet Background Sync
       fetch('/api/move', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: selectedUserId, areaId: selectedArea })
-      })
-      .then(() => { 
-        closeModal(); 
-        reloadData(); 
-      })
-      .catch(err => console.error("Failed to move area", err));
+      }).catch(err => console.error("Update failed", err));
     }
 
-    function closeModal() { 
-      document.getElementById('areaModal').style.display = 'none'; 
-    }
+    function closeModal() { document.getElementById('areaModal').style.display = 'none'; }
 
     window.onload = init;
   </script>
