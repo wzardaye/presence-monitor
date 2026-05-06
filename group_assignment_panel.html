@@ -21,10 +21,9 @@
       overflow: hidden;
     }
 
-    /* Top Banner */
+    /* 1. ORANGE TOP BANNER */
     .top-banner {
-      width: 100%;
-      background: linear-gradient(90deg, #0cff34d5, #05920c);
+      background: rgba(245, 185, 39, 0.96);
       color: white;
       font-size: 36px;
       font-weight: 700;
@@ -33,6 +32,36 @@
       letter-spacing: 2px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       z-index: 100;
+      border: none;
+    }
+
+    /* 2. ORANGE NAVIGATION BAR */
+    .nav-bar {
+      background: rgba(245, 185, 39, 0.96);
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .nav-bar a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .nav-bar a:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-bar a.active {
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(0, 0, 0, 0.2);
     }
 
     /* Container for the rest of the app */
@@ -72,7 +101,7 @@
 
     /* LEFT SIDEBAR */
     .sidebar {
-      width: 400px; /* Expanded to fit three dropdowns */
+      width: 400px;
       background: white;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -83,12 +112,12 @@
 
     .sidebar-header {
       padding: 12px 16px;
-      background: #f0fff2;
+      background: #fffdf5; /* Tinted to match orange theme */
       border-bottom: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      border-left: 4px solid #46eb25;
+      border-left: 4px solid rgba(245, 185, 39, 0.96);
     }
 
     .sidebar-header-top {
@@ -99,7 +128,7 @@
 
     .sidebar-title {
       font-weight: 600;
-      color: #335540;
+      color: #7b5906;
       font-size: 14px;
     }
 
@@ -112,9 +141,9 @@
       flex: 1;
       padding: 4px 4px;
       border-radius: 6px;
-      border: 1px solid #25eb35;
-      font-size: 10px; /* Reduced slightly for fit */
-      color: #25eb25;
+      border: 1px solid rgba(245, 185, 39, 0.96);
+      font-size: 10px;
+      color: #a37500;
       background: white;
       outline: none;
       font-weight: bold;
@@ -204,7 +233,7 @@
 
     .area-marker b {
       display: block;
-      color: #f1c40f;
+      color: rgba(245, 185, 39, 0.96); /* Changed marker title to orange */
       margin-bottom: 4px;
       border-bottom: 1px solid rgba(255,255,255,0.2);
       padding-bottom: 4px;
@@ -244,7 +273,6 @@
       background: radial-gradient(circle at 3px 3px, #ff8585, #d93025);
     }
 
-    /* Dot in sidebar card */
     .sidebar-dot {
       position: absolute;
       top: 12px;
@@ -252,7 +280,7 @@
     }
 
     .area-marker.drag-over {
-      background: rgba(37, 99, 235, 1);
+      background: rgba(245, 185, 39, 0.96); /* Highlight orange when dragging */
       transform: translate(-50%, -50%) scale(1.1);
       border-color: #fff;
     }
@@ -274,9 +302,16 @@
 
   <div class="top-banner">MER-C HENKATEN BOARD</div>
 
+  <!-- NAVIGATION BAR (Map is Active) -->
+  <div class="nav-bar">
+    <a href="/">📊 Main Dashboard</a>
+    <a href="/control">⚙️ Control Panel</a>
+    <a href="/map" class="active">🗺️ Tasking Map</a>
+  </div>
+
   <div class="app-container">
     <div id="mockWarning">
-      ⚠️ BACKEND ERROR: The server returned NO DATA or is unreachable. Check your terminal for Syntax Errors!
+      ⚠️ BACKEND ERROR: The server returned NO DATA or is unreachable. Connecting to fallback mode.
     </div>
 
     <div class="header">
@@ -315,7 +350,7 @@
 
       <div class="main-content">
         <div id="mapWrapper">
-          <img id="layoutImg" src="images/layout.png">
+          <img id="layoutImg" src="images/layout.png" onerror="this.src='https://placehold.co/1000x400/e0e0e0/888?text=Map+Layout+Image'">
           <div id="markerLayer"></div>
         </div>
       </div>
@@ -323,136 +358,128 @@
   </div>
 
   <script>
-    var FALLBACK_AVATAR = "images/0Br.png";
-    var DATA = { people: [], areas: [] };
+    let FALLBACK_AVATAR = "images/0Br.png";
+    let DATA = { people: [], areas: [] };
 
-    function ajax(url, method, payload, callback) {
-      var xhr = new XMLHttpRequest();
-      xhr.open(method || 'GET', url, true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try { callback(null, JSON.parse(xhr.responseText)); } catch(e) { callback(e); }
-          } else { callback(new Error('Status: ' + xhr.status)); }
-        }
-      };
-      xhr.send(payload ? JSON.stringify(payload) : null);
-    }
-
+    // Fetch live data from Vercel Backend
     function reloadData() {
-      ajax('/api/data', 'GET', null, function(err, data) {
-        var warning = document.getElementById('mockWarning');
-        if (err || !data || !data.people) {
-          warning.style.display = 'block';
-          return;
-        }
-        warning.style.display = 'none';
-        DATA = data;
-        renderUI(data);
-      });
+      fetch('/api/data')
+        .then(res => {
+          if (!res.ok) throw new Error("API not reachable");
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById('mockWarning').style.display = 'none';
+          DATA = data;
+          renderUI(data);
+        })
+        .catch(err => {
+          console.error("Fetch error:", err);
+          document.getElementById('mockWarning').style.display = 'block';
+        });
     }
 
+    // Connect drag-and-drop actions to Vercel Backend
     function performMove(userId, targetAreaId) {
-      ajax('/api/move', 'POST', { id: userId, areaId: targetAreaId }, function(err) {
-        if (!err) reloadData();
-      });
+      fetch('/api/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId, areaId: targetAreaId })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to move");
+        reloadData(); // Instantly refresh map to reflect the change
+      })
+      .catch(err => console.error("Error moving user:", err));
     }
 
     function renderUI(data) {
-      var lastUpdatedText = document.getElementById('lastUpdatedText');
+      const lastUpdatedText = document.getElementById('lastUpdatedText');
       if (lastUpdatedText) {
         lastUpdatedText.innerText = new Date(data.lastUpdated).toLocaleString();
       }
 
-      var filterValue = document.getElementById('filterDropdown').value;
-      var shiftValue = document.getElementById('shiftDropdown').value;
-      var presenceValue = document.getElementById('presenceDropdown').value;
+      const filterValue = document.getElementById('filterDropdown').value;
+      const shiftValue = document.getElementById('shiftDropdown').value;
+      const presenceValue = document.getElementById('presenceDropdown').value;
 
       // Sidebar Rendering
-      var list = document.getElementById('peopleList');
+      const list = document.getElementById('peopleList');
       list.innerHTML = '';
-      for (var i = 0; i < data.people.length; i++) {
-        var p = data.people[i];
-        
+      
+      data.people.forEach(p => {
         // 1. Shift Filter
-        if (shiftValue !== 'all') {
-          if (!p.shift || String(p.shift) !== shiftValue) continue;
-        }
+        if (shiftValue !== 'all' && (!p.shift || String(p.shift) !== shiftValue)) return;
 
         // 2. Tasking Status Filter (Idle/Assigned)
-        var isAssigned = (p.areas && p.areas.length > 0 && p.areas[0] !== "" && p.areas[0] !== null);
-        if (filterValue === 'idle' && isAssigned) continue;
-        if (filterValue === 'assigned' && !isAssigned) continue;
+        const isAssigned = (p.areas && p.areas.length > 0 && p.areas[0] !== "" && p.areas[0] !== null);
+        if (filterValue === 'idle' && isAssigned) return;
+        if (filterValue === 'assigned' && !isAssigned) return;
 
         // 3. Presence Filter
-        if (presenceValue === 'present' && !p.present) continue;
-        if (presenceValue === 'absent' && p.present) continue;
+        if (presenceValue === 'present' && !p.present) return;
+        if (presenceValue === 'absent' && p.present) return;
 
-        var areaName = 'Idle';
+        let areaName = 'Idle';
         if (isAssigned) {
-          for (var j = 0; j < data.areas.length; j++) {
-            if (data.areas[j].id === p.areas[0]) areaName = data.areas[j].name;
-          }
+          const areaObj = data.areas.find(a => a.id === p.areas[0]);
+          if (areaObj) areaName = areaObj.name;
         }
 
-        var card = document.createElement('div');
+        const card = document.createElement('div');
         card.className = 'employee-card';
         card.setAttribute('draggable', 'true');
         
-        (function(id) {
-          card.ondragstart = function(e) { e.dataTransfer.setData('text/plain', id); };
-        })(p.id);
+        card.ondragstart = function(e) { e.dataTransfer.setData('text/plain', p.id); };
 
-        var dotClass = p.present ? 'green' : 'red';
-        var shiftLabel = p.shift ? ' | S' + p.shift : '';
+        const dotClass = p.present ? 'green' : 'red';
+        const shiftLabel = p.shift ? ' | S' + p.shift : '';
 
-        card.innerHTML = '<img src="' + p.avatar + '" class="emp-avatar" onerror="this.src=\'' + FALLBACK_AVATAR + '\'">' +
-          '<div class="emp-info"><div class="emp-name">' + p.name + '</div>' +
-          '<div class="emp-area">' + areaName + shiftLabel + '</div></div>' +
-          '<span class="status-dot ' + dotClass + ' sidebar-dot"></span>' +
-          '<div style="color: #cbd5e1; margin-left: 10px;">⋮⋮</div>';
+        card.innerHTML = `
+          <img src="${p.avatar || ''}" class="emp-avatar" onerror="this.src='${FALLBACK_AVATAR}'">
+          <div class="emp-info">
+            <div class="emp-name">${p.name}</div>
+            <div class="emp-area">${areaName}${shiftLabel}</div>
+          </div>
+          <span class="status-dot ${dotClass} sidebar-dot"></span>
+          <div style="color: #cbd5e1; margin-left: 10px;">⋮⋮</div>`;
+          
         list.appendChild(card);
-      }
+      });
 
       // Map Markers Rendering
-      var layer = document.getElementById('markerLayer');
+      const layer = document.getElementById('markerLayer');
       layer.innerHTML = '';
-      for (var k = 0; k < data.areas.length; k++) {
-        var area = data.areas[k];
-        var marker = document.createElement('div');
+      
+      data.areas.forEach(area => {
+        const marker = document.createElement('div');
         marker.className = 'area-marker';
         
-        var occsHtml = '';
-        for (var m = 0; m < data.people.length; m++) {
-          var person = data.people[m];
-          
-          // Apply Shift Filter to Map
-          if (shiftValue !== 'all' && (!person.shift || String(person.shift) !== shiftValue)) continue;
+        let occsHtml = '';
+        data.people.forEach(person => {
+          // Apply Filters to Map
+          if (shiftValue !== 'all' && (!person.shift || String(person.shift) !== shiftValue)) return;
+          if (presenceValue === 'present' && !person.present) return;
+          if (presenceValue === 'absent' && person.present) return;
 
-          // Apply Presence Filter to Map
-          if (presenceValue === 'present' && !person.present) continue;
-          if (presenceValue === 'absent' && person.present) continue;
-
-          // Determine status for this person
-          var isPersAssigned = (person.areas && person.areas.length > 0 && person.areas[0] !== "" && person.areas[0] !== null);
-          
-          // Check if person matches the global filter
-          if (filterValue === 'idle' && isPersAssigned) continue;
-          if (filterValue === 'assigned' && !isPersAssigned) continue;
+          const isPersAssigned = (person.areas && person.areas.length > 0 && person.areas[0] !== "" && person.areas[0] !== null);
+          if (filterValue === 'idle' && isPersAssigned) return;
+          if (filterValue === 'assigned' && !isPersAssigned) return;
 
           // Check if person is actually in this specific area
-          if (person.areas.indexOf(area.id) !== -1) {
-            var dotColor = person.present ? 'green' : 'red';
-            occsHtml += '<div class="worker-row" title="Double-click to remove" ondblclick="performMove(\'' + person.id + '\', \'\')">' +
-                          '<span>' + person.name + '</span>' +
-                          '<span class="status-dot ' + dotColor + '"></span>' +
-                        '</div>';
+          if (person.areas && person.areas.includes(area.id)) {
+            const dotColor = person.present ? 'green' : 'red';
+            // Passing an empty string removes them from the area (makes them Idle)
+            occsHtml += `
+              <div class="worker-row" title="Double-click to remove" ondblclick="performMove('${person.id}', '')">
+                <span>${person.name}</span>
+                <span class="status-dot ${dotColor}"></span>
+              </div>`;
           }
-        }
+        });
 
         // POSITIONING LOGIC
-        var posX = 50, posY = 50;
+        let posX = 50, posY = 50;
         if (area.layout) {
           posX = area.layout.x;
           posY = area.layout.y;
@@ -462,21 +489,20 @@
         marker.style.top = posY + '%';
         if (area.layout && area.layout.size) marker.style.width = area.layout.size + 'px';
 
-        marker.innerHTML = '<b>' + area.name + '</b>' + (occsHtml || '<span style="color:#94a3b8;">Empty</span>');
+        marker.innerHTML = `<b>${area.name}</b>${occsHtml || '<span style="color:#94a3b8;">Empty</span>'}`;
 
-        (function(mkr, aId) {
-          mkr.ondragover = function(e) { e.preventDefault(); mkr.classList.add('drag-over'); };
-          mkr.ondragleave = function() { mkr.classList.remove('drag-over'); };
-          mkr.ondrop = function(e) {
-            e.preventDefault();
-            mkr.classList.remove('drag-over');
-            var userId = e.dataTransfer.getData('text/plain');
-            if (userId) performMove(userId, aId);
-          };
-        })(marker, area.id);
+        // Setup drop zones for dragging
+        marker.ondragover = function(e) { e.preventDefault(); marker.classList.add('drag-over'); };
+        marker.ondragleave = function() { marker.classList.remove('drag-over'); };
+        marker.ondrop = function(e) {
+          e.preventDefault();
+          marker.classList.remove('drag-over');
+          const userId = e.dataTransfer.getData('text/plain');
+          if (userId) performMove(userId, area.id);
+        };
 
         layer.appendChild(marker);
-      }
+      });
     }
 
     window.onload = function() { 
