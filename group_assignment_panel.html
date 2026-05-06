@@ -357,13 +357,13 @@
     </div>
   </div>
 
-  <script>
+<script>
     let FALLBACK_AVATAR = "images/0Br.png";
     let DATA = { people: [], areas: [] };
 
-    // Fetch live data from Vercel Backend
     function reloadData() {
-      fetch('/api/data')
+      // FIX: Add timestamp to bypass Vercel Caching
+      fetch('/api/data?t=' + new Date().getTime())
         .then(res => {
           if (!res.ok) throw new Error("API not reachable");
           return res.json();
@@ -379,18 +379,20 @@
         });
     }
 
-    // Connect drag-and-drop actions to Vercel Backend
     function performMove(userId, targetAreaId) {
+      // FIX: Optimistic Update! Move the worker instantly on screen
+      const person = DATA.people.find(p => p.id === userId);
+      if (person) {
+        person.areas = targetAreaId ? [targetAreaId] : [];
+        renderUI(DATA); 
+      }
+
+      // Quiet Background Sync
       fetch('/api/move', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: userId, areaId: targetAreaId })
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to move");
-        reloadData(); // Instantly refresh map to reflect the change
-      })
-      .catch(err => console.error("Error moving user:", err));
+      }).catch(err => console.error("Error moving user:", err));
     }
 
     function renderUI(data) {
@@ -403,20 +405,16 @@
       const shiftValue = document.getElementById('shiftDropdown').value;
       const presenceValue = document.getElementById('presenceDropdown').value;
 
-      // Sidebar Rendering
       const list = document.getElementById('peopleList');
       list.innerHTML = '';
       
       data.people.forEach(p => {
-        // 1. Shift Filter
         if (shiftValue !== 'all' && (!p.shift || String(p.shift) !== shiftValue)) return;
 
-        // 2. Tasking Status Filter (Idle/Assigned)
         const isAssigned = (p.areas && p.areas.length > 0 && p.areas[0] !== "" && p.areas[0] !== null);
         if (filterValue === 'idle' && isAssigned) return;
         if (filterValue === 'assigned' && !isAssigned) return;
 
-        // 3. Presence Filter
         if (presenceValue === 'present' && !p.present) return;
         if (presenceValue === 'absent' && p.present) return;
 
@@ -429,7 +427,6 @@
         const card = document.createElement('div');
         card.className = 'employee-card';
         card.setAttribute('draggable', 'true');
-        
         card.ondragstart = function(e) { e.dataTransfer.setData('text/plain', p.id); };
 
         const dotClass = p.present ? 'green' : 'red';
@@ -447,7 +444,6 @@
         list.appendChild(card);
       });
 
-      // Map Markers Rendering
       const layer = document.getElementById('markerLayer');
       layer.innerHTML = '';
       
@@ -457,7 +453,6 @@
         
         let occsHtml = '';
         data.people.forEach(person => {
-          // Apply Filters to Map
           if (shiftValue !== 'all' && (!person.shift || String(person.shift) !== shiftValue)) return;
           if (presenceValue === 'present' && !person.present) return;
           if (presenceValue === 'absent' && person.present) return;
@@ -466,10 +461,8 @@
           if (filterValue === 'idle' && isPersAssigned) return;
           if (filterValue === 'assigned' && !isPersAssigned) return;
 
-          // Check if person is actually in this specific area
           if (person.areas && person.areas.includes(area.id)) {
             const dotColor = person.present ? 'green' : 'red';
-            // Passing an empty string removes them from the area (makes them Idle)
             occsHtml += `
               <div class="worker-row" title="Double-click to remove" ondblclick="performMove('${person.id}', '')">
                 <span>${person.name}</span>
@@ -478,12 +471,8 @@
           }
         });
 
-        // POSITIONING LOGIC
         let posX = 50, posY = 50;
-        if (area.layout) {
-          posX = area.layout.x;
-          posY = area.layout.y;
-        }
+        if (area.layout) { posX = area.layout.x; posY = area.layout.y; }
         
         marker.style.left = posX + '%';
         marker.style.top = posY + '%';
@@ -491,7 +480,6 @@
 
         marker.innerHTML = `<b>${area.name}</b>${occsHtml || '<span style="color:#94a3b8;">Empty</span>'}`;
 
-        // Setup drop zones for dragging
         marker.ondragover = function(e) { e.preventDefault(); marker.classList.add('drag-over'); };
         marker.ondragleave = function() { marker.classList.remove('drag-over'); };
         marker.ondrop = function(e) {
