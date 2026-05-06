@@ -174,13 +174,14 @@
     /* NAVIGATION BAR */
     .top-banner {
       background: rgba(245, 185, 39, 0.96);
-      color: white; /* You can change this to #1e293b if you prefer dark text */
+      color: white;
       font-size: 36px;
       font-weight: 700;
       text-align: center;
       padding: 20px 0;
       letter-spacing: 2px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: none !important;
+      margin-bottom: 0 !important;
       z-index: 100;
       border: none;
     }
@@ -191,7 +192,10 @@
       justify-content: center;
       gap: 20px;
       padding: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-top: 0 !important;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 99;
     }
 
     .nav-bar a {
