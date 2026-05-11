@@ -14,7 +14,9 @@
     }
 
     .top-banner {
-      background: linear-gradient(90deg, #0cff34d5, #05920c);
+      display: block;
+      width: 100%;
+      background: linear-gradient(90deg, #0c6dffd5, #054792);
       color: white;
       font-size: 36px;
       font-weight: 700;
@@ -22,10 +24,8 @@
       padding: 20px 0;
       letter-spacing: 2px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      margin-bottom: 20px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      z-index: 100;
+      border: none;
     }
 
     .container {
@@ -172,20 +172,1163 @@
     }
 
     /* NAVIGATION BAR */
-    .top-banner {
+    .nav-bar {
       background: rgba(245, 185, 39, 0.96);
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 12px;
+      margin-top: 0 !important;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 99;
+    }
+
+    .nav-bar a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .nav-bar a:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-bar a.active {
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    th { background: #f9f9f9; }
+
+    textarea.json-input {
+      width: 100%;
+      height: 150px;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+    }
+
+    .btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .btn:hover { background: #2980b9; }
+
+    .btn-small {
+      padding: 4px 8px;
+      font-size: 11px;
+      margin-top: 0;
+    }
+
+    .btn-danger { background: #e74c3c; }
+    .btn-danger:hover { background: #c0392b; }
+
+    .mode-indicator {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+      background: #e74c3c;
+      color: white;
+    }
+    .mode-live { background: #05920c; }
+
+    /* Map */
+    #mapWrapper {
+      position: relative;
+      width: 100%;
+      background: #e0e0e0;
+      background-image: radial-gradient(#bebebe 1px, transparent 1px);
+      background-size: 20px 20px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    #mapBg {
+      width: 100%;
+      display: block;
+      min-height: 200px;
+    }
+
+    #areaMap {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 2;
+      pointer-events: none; 
+    }
+
+    .area-box {
+      position: absolute;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      font-size: 12px;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      min-width: 80px;
+      z-index: 10;
+      pointer-events: auto;
+    }
+
+    .area-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #f1c40f;
+    }
+
+    .idle {
+      color: #bdc3c7;
+      font-style: italic;
+    }
+
+    /* List Rows */
+    #areaDropdown {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .person-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px;
+      background: #f9f9f9;
+      border-radius: 6px;
+      border-left: 4px solid transparent;
+    }
+    .person-row.absent-row { border-left-color: #e74c3c; }
+
+    .person-row img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      margin-right: 12px;
+      background: #ddd;
+    }
+
+    .person-info { flex: 1; min-width: 0; }
+    .person-name { font-weight: bold; font-size: 14px; }
+    .person-role { font-size: 11px; color: #777; }
+    .absence-detail { font-size: 11px; color: #e74c3c; font-style: italic; margin-top: 2px; }
+
+    .present-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-left: 10px;
+    }
+    .present-dot.green { background: #05920c; }
+    .present-dot.red { background: #e74c3c; }
+
+    /* ========================================= */
+    /* NEW: Simple Area Assignments Section      */
+    /* ========================================= */
+    .simple-view-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 15px;
+    }
+    .simple-area-block {
+      border-radius: 12px;
+      padding: 16px;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .simple-area-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .area-count-badge {
+      font-size: 13px;
+      background: rgba(255,255,255,0.25);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    /* Inner User Cards (Scoped as .user-card so it doesn't break main layout) */
+    .user-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+      color: #333; /* Reset text color for inner card */
+    }
+    .user-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+    .user-card .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .user-card .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      object-fit: cover;
+      margin: 0; /* Override generic avatar margin */
+    }
+    .user-card .card-header-info { display: flex; flex-direction: column; }
+    .user-card .card-header-info b { font-size: 16px; color: #1e293b; margin-bottom: 2px; }
+    .user-card .role { font-size: 12px; color: #64748b; }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .modal-header {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .modal-body label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .modal-body input, .modal-body textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+      .full-width { grid-column: span 1; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top-banner">MER-C HENKATEN BOARD</div>
+
+<div class="nav-bar">
+    <a href="/" class="active">Dashboard</a>
+    <a href="/control">Control Panel</a>
+    <a href="/map">Grouping Map</a>
+  </div>
+  
+  <div class="container">
+    
+    <!-- Row 1 -->
+    <div class="card">
+      <h3>Organization Structure</h3>
+      <div id="org"></div>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+        <h3 style="border: none; padding: 0; margin: 0;">Presence Overview</h3>
+        <div class="filter-group">
+          <div class="shift-btn-group" id="shiftBtnGroup">
+            <button class="shift-btn active" onclick="changeShiftView('all')" data-shift="all">All</button>
+            <button class="shift-btn" onclick="changeShiftView('1')" data-shift="1">Shift 1</button>
+            <button class="shift-btn" onclick="changeShiftView('2')" data-shift="2">Shift 2</button>
+          </div>
+          <select class="status-select" onchange="changeStatusView(this.value)">
+            <option value="all">All Status</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="circle" id="presenceCircle">
+        <div class="circle-text">
+          <div id="percentText">0%</div>
+          <div id="countText">0/0</div>
+        </div>
+      </div>
+      <div class="header">
+        Last Updated: <span id="lastUpdatedText">-</span>
+      </div>
+    </div>
+
+    <!-- Row 2: Control Panel -->
+    <div class="card control-panel full-width">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; gap: 10px;">
+        <div style="display: flex; align-items: center;">
+          <h3 style="border: none; padding: 0; margin: 0;">Control Panel</h3>
+          <span id="modeBadge" class="mode-indicator mode-live">LIVE MODE</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div class="filter-group">
+            <div class="shift-btn-group">
+              <button class="shift-btn active" onclick="changeShiftView('all')" data-shift="all">All</button>
+              <button class="shift-btn" onclick="changeShiftView('1')" data-shift="1">Shift 1</button>
+              <button class="shift-btn" onclick="changeShiftView('2')" data-shift="2">Shift 2</button>
+            </div>
+            <select class="status-select" onchange="changeStatusView(this.value)">
+              <option value="all">All Status</option>
+              <option value="present">Present</option>
+              <option value="absent">Absent</option>
+            </select>
+          </div>
+          <button class="btn" style="margin-top: 0;" onclick="resetToLiveMode()">Resume Live API</button>
+        </div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Shift</th>
+              <th>Presence Status</th>
+              <th>Assignment</th>
+              <th>Reason/Return</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="controlTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Row 3: Absent Users & Area Details -->
+    <div class="card">
+      <h3>Absent Users</h3>
+      <p style="font-size: 12px; color: #666; margin-top: 0;">Currently missing from assigned shift.</p>
+      <div id="absentList" style="max-height: 300px; overflow-y: auto;"></div>
+    </div>
+
+    <div class="card">
+      <h3>Area Detail List</h3>
+      <select id="areaDropdown" onchange="renderAreaDetails()"></select>
+      <div id="areaPeople" style="max-height: 300px; overflow-y: auto;"></div>
+    </div>
+
+    <!-- NEW ROW: Simple Area Assignments -->
+    <div class="card full-width">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+        <h3 style="border: none; padding: 0; margin: 0;">Area Assignments</h3>
+        <select id="emptyAreaDropdown" onchange="renderSimpleAreas()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px;">
+          <option value="hide">Hide Empty Areas</option>
+          <option value="show">Show Empty Areas</option>
+        </select>
+      </div>
+      <div id="simpleGroupView" class="simple-view-container">
+         <!-- Gradient blocks generate here -->
+      </div>
+    </div>
+
+    <!-- Row 4: Group Assignment Map -->
+    <div class="card full-width">
+      <h3>Visual Layout Map</h3>
+      <div id="mapWrapper">
+        <img src="images/layout.png" id="mapBg" onerror="this.src='https://placehold.co/1000x400/e0e0e0/888?text=Map+Image+Not+Found'">
+        <div id="areaMap"></div>
+      </div>
+    </div>
+
+    <!-- Row 5: Log Table -->
+    <div class="card full-width">
+      <h3>Daily Presence Log</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Summary</th>
+          </tr>
+        </thead>
+        <tbody id="logTable">
+          <tr><td colspan="2">Loading logs...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Row 6: Initial Data Configuration (Bottom) -->
+    <div class="card full-width">
+      <h3>Initial Data Configuration</h3>
+      <p style="font-size: 12px; color: #666; margin-top: 0;">Edit the JSON below to define base areas and employees.</p>
+      <textarea id="initialDataText" class="json-input"></textarea>
+      <button class="btn" onclick="applyInitialData()">Apply JSON Data</button>
+      <div id="jsonError" style="color: red; font-size: 12px; margin-top: 5px; display: none;">Invalid JSON format!</div>
+    </div>
+
+  </div>
+
+  <!-- Absence Modal -->
+  <div id="absenceModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 id="modalTitle" style="margin: 0;">Absence Reason</h4>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="targetPersonId">
+        <label for="absenceReasonInput">Reason of Absence:</label>
+        <textarea id="absenceReasonInput" rows="3" placeholder="e.g. Sick leave, Personal matter..."></textarea>
+        
+        <label for="expectedReturnInput">Expected Return Date & Time:</label>
+        <input type="datetime-local" id="expectedReturnInput">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger btn-small" onclick="closeAbsenceModal()">Cancel</button>
+        <button class="btn btn-small" onclick="saveAbsenceDetails()">Save Details</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+    let DATA = {};
+    let isManualMode = false;
+    let currentShiftView = 'all'; 
+    let currentStatusFilter = 'all';
+
+    const BLOCK_GRADIENTS = [
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', // Blue
+      'linear-gradient(135deg, #f6d365 0%, #fda085 100%)', // Orange/Yellow
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', // Green
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', // Pink/Yellow
+      'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)', // Purple
+      'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)', // Red
+    ];
+
+    // We keep MOCK_DATA just as a failsafe if the server is completely down
+    const MOCK_DATA = {
+      "lastUpdated": new Date().toISOString(),
+      "dailyLogs": [],
+      "people": [],
+      "areas": []
+    };
+
+    window.onload = () => {
+      // FIX 1: Prevent double-fetching on load. 
+      // startPolling() handles both the initial load and the timer!
+      startPolling();
+    };
+
+    function changeShiftView(val) {
+      currentShiftView = val;
+      document.querySelectorAll('.shift-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-shift') === String(val));
+      });
+      renderAll();
+    }
+
+    function changeStatusView(val) {
+      currentStatusFilter = val;
+      document.querySelectorAll('.status-select').forEach(s => s.value = val);
+      renderAll();
+    }
+
+    function getActivePeople() {
+      if (!DATA || !DATA.people) return [];
+      return DATA.people.filter(p => {
+        const shiftMatch = currentShiftView === 'all' || p.shift === parseInt(currentShiftView);
+        const statusMatch = currentStatusFilter === 'all' ||
+                            (currentStatusFilter === 'present' && p.present) ||
+                            (currentStatusFilter === 'absent' && !p.present);
+        return shiftMatch && statusMatch;
+      });
+    }
+
+    function initData(data) {
+      if (!data || !data.people) return;
+      DATA = data;
+      const jsonArea = document.getElementById('initialDataText');
+      if (jsonArea && document.activeElement !== jsonArea) {
+        jsonArea.value = JSON.stringify(DATA, null, 2);
+      }
+      renderAll();
+    }
+
+    function renderAll() {
+      renderOrg();
+      initAreaDropdown();
+      renderSimpleAreas(); // Renders the new visual blocks
+      renderAreasMap();
+      renderControlPanel();
+      renderAbsentUsers();
+      updateLastUpdated(DATA.lastUpdated);
+      
+      const activePeople = getActivePeople();
+      const presentCount = activePeople.filter(p => p.present).length;
+      updateCircle(presentCount, activePeople.length);
+    }
+
+    function renderOrg() {
+      const org = document.getElementById('org');
+      if (!org) return;
+      org.innerHTML = '';
+      getActivePeople().forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'person ' + (p.present ? 'present' : 'absent');
+        div.innerHTML = `
+          <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${p.name}'">
+          <div>${p.name}</div>
+        `;
+        org.appendChild(div);
+      });
+    }
+
+    function renderAbsentUsers() {
+      const container = document.getElementById('absentList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const absentPeople = DATA.people.filter(p => {
+        const shiftMatch = currentShiftView === 'all' || p.shift === parseInt(currentShiftView);
+        return shiftMatch && !p.present;
+      });
+
+      if (absentPeople.length === 0) {
+        container.innerHTML = '<div style="color: #05920c; padding: 10px; text-align: center; font-weight: bold;">Full attendance for this shift! ✅</div>';
+        return;
+      }
+
+      absentPeople.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'person-row absent-row';
+        
+        let absenceHtml = '';
+        if (p.absenceReason || p.expectedReturn) {
+          absenceHtml = `<div class="absence-detail">
+            <div style="font-weight: 500;">${p.absenceReason ? p.absenceReason : 'No reason given'}</div>
+            ${p.expectedReturn ? '<div style="color: #555; margin-top: 2px;">Return: ' + new Date(p.expectedReturn).toLocaleString() + '</div>' : ''}
+          </div>`;
+        }
+
+        div.innerHTML = `
+          <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name}" onerror="this.src='https://ui-avatars.com/api/?name=${p.name}'" />
+          <div class="person-info">
+            <div class="person-name">${p.name}</div>
+            <div class="person-role">${p.role || 'Personnel'} (Shift ${p.shift})</div>
+            ${absenceHtml}
+          </div>
+          <button class="btn btn-small" onclick="openAbsenceModal('${p.id}')">Reason</button>
+          <div class="present-dot red"></div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderControlPanel() {
+      const tbody = document.getElementById('controlTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      getActivePeople().forEach((p) => {
+        const tr = document.createElement('tr');
+        let areaOptions = `<option value="idle">-- Idle --</option>`;
+        DATA.areas.forEach(a => {
+          const isSelected = p.areas && p.areas.includes(a.id) ? 'selected' : '';
+          areaOptions += `<option value="${a.id}" ${isSelected}>${a.name}</option>`;
+        });
+
+        let absenceSummary = '-';
+        if (!p.present) {
+          const reason = p.absenceReason || 'No reason';
+          const returnDate = p.expectedReturn ? `<div style="color: #777; margin-top: 2px;">Return: ${new Date(p.expectedReturn).toLocaleDateString()}</div>` : '';
+          absenceSummary = `<div style="font-weight: 500;">${reason}</div>${returnDate}`;
+        }
+
+        tr.innerHTML = `
+          <td><strong>${p.name}</strong></td>
+          <td>Shift ${p.shift || '-'}</td>
+          <td>
+            <label><input type="checkbox" onchange="handleControlChange('${p.id}', 'present', this.checked)" ${p.present ? 'checked' : ''}>
+            ${p.present ? 'Present' : 'Absent'}</label>
+          </td>
+          <td><select onchange="handleControlChange('${p.id}', 'area', this.value)">${areaOptions}</select></td>
+          <td style="font-size:11px;">${absenceSummary}</td>
+          <td>
+            ${!p.present ? `<button class="btn btn-small" style="margin:0;" onclick="openAbsenceModal('${p.id}')">Edit Reason</button>` : '-'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openAbsenceModal(personId) {
+      const person = DATA.people.find(p => p.id === personId);
+      if (!person) return;
+      
+      document.getElementById('targetPersonId').value = personId;
+      document.getElementById('modalTitle').innerText = `Absence Detail: ${person.name}`;
+      document.getElementById('absenceReasonInput').value = person.absenceReason || '';
+      document.getElementById('expectedReturnInput').value = person.expectedReturn || '';
+      
+      document.getElementById('absenceModal').style.display = 'flex';
+    }
+
+    function closeAbsenceModal() {
+      document.getElementById('absenceModal').style.display = 'none';
+    }
+
+    async function saveAbsenceDetails() {
+      const id = document.getElementById('targetPersonId').value;
+      const reason = document.getElementById('absenceReasonInput').value;
+      const returnDate = document.getElementById('expectedReturnInput').value;
+      
+      const person = DATA.people.find(p => p.id === id);
+      if (person) {
+        // 1. Optimistic UI Update (Update screen instantly)
+        person.absenceReason = reason;
+        person.expectedReturn = returnDate;
+        person.present = false; 
+        
+        isManualMode = true;
+        updateModeBadge();
+        saveToLocalStorageFallback();
+        closeAbsenceModal();
+
+        // 2. Background Sync: Send reason to MongoDB
+        try {
+          await fetch('/api/presence', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              id: id, 
+              present: false, 
+              reason: reason 
+            })
+          });
+        } catch (error) {
+          console.error("Failed to save reason to database:", error);
+        }
+      }
+    }
+
+    async function handleControlChange(personId, field, value) {
+      isManualMode = true;
+      updateModeBadge();
+      
+      const person = DATA.people.find(p => p.id === personId);
+      if (!person) return;
+
+      try {
+        if (field === 'present') {
+          person.present = value;
+          if (value) {
+            delete person.absenceReason;
+            delete person.expectedReturn;
+          }
+          await fetch('/api/presence', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: personId, present: value }) // Basic toggle doesn't send reason
+          });
+        } 
+        else if (field === 'area') {
+          person.areas = value === 'idle' ? [] : [value];
+          await fetch('/api/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: personId, areaId: value === 'idle' ? '' : value })
+          });
+        }
+        saveToLocalStorageFallback(); // Update UI
+      } catch (error) {
+        console.error("Error communicating with server:", error);
+      }
+    }
+
+    function saveToLocalStorageFallback() {
+      DATA.lastUpdated = new Date().toISOString();
+      localStorage.setItem('henkatenData_v4', JSON.stringify(DATA));
+      initData(DATA);
+    }
+
+    function applyInitialData() {
+      const text = document.getElementById('initialDataText').value;
+      try {
+        const parsed = JSON.parse(text);
+        isManualMode = true; 
+        updateModeBadge();
+        localStorage.setItem('henkatenData_v4', JSON.stringify(parsed));
+        initData(parsed);
+      } catch (err) {
+        document.getElementById('jsonError').style.display = 'block';
+      }
+    }
+
+    function resetToLiveMode() {
+      isManualMode = false;
+      updateModeBadge();
+      reloadData();
+    }
+
+    function updateModeBadge() {
+      const badge = document.getElementById('modeBadge');
+      if(badge) {
+        badge.className = isManualMode ? 'mode-indicator' : 'mode-indicator mode-live';
+        badge.innerText = isManualMode ? 'MANUAL / LOCAL OVERRIDE' : 'LIVE API MODE';
+      }
+    }
+
+    // FIX 2: Added deep error inspection to reloadData
+    function reloadData() {
+      if (isManualMode) return;
+      fetch('/api/data?t=' + new Date().getTime())
+        .then(async res => {
+          // If Vercel throws an error (like a 500 crash or 404), catch it here!
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Server returned ${res.status}: ${errText.substring(0, 100)}`);
+          }
+          // If Vercel accidentally returns an HTML page instead of JSON, catch it here!
+          const contentType = res.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            const errText = await res.text();
+            throw new Error(`Expected JSON but got HTML. Response: ${errText.substring(0, 100)}`);
+          }
+          return res.json();
+        })
+        .then(data => initData(data))
+        .catch((err) => {
+          // THIS will print the true error to your console so we can debug it
+          console.error("API FETCH FAILED:", err.message);
+          
+          // Only fallback to Mock Data if the screen is currently completely empty
+          if (!DATA.people || DATA.people.length === 0) {
+            console.warn("Could not reach API. Falling back to local/mock data.");
+            const savedData = localStorage.getItem('henkatenData_v4');
+            if (savedData) {
+              try { initData(JSON.parse(savedData)); } catch(e) { initData(MOCK_DATA); }
+            } else {
+              initData(MOCK_DATA);
+            }
+          }
+        });
+    }
+
+    function initAreaDropdown() {
+      const select = document.getElementById('areaDropdown');
+      if (!select || !DATA.areas) return;
+      const currentSelection = select.value;
+      select.innerHTML = '';
+      DATA.areas.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.name;
+        select.appendChild(opt);
+      });
+      const idleOption = document.createElement('option');
+      idleOption.value = 'idle';
+      idleOption.textContent = 'Idle / Unassigned';
+      select.appendChild(idleOption);
+      if (currentSelection) select.value = currentSelection;
+      renderAreaDetails();
+    }
+
+    // ==========================================
+    // NEW: Render the Simple Area Blocks
+    // ==========================================
+    function renderSimpleAreas() {
+      const container = document.getElementById('simpleGroupView');
+      const showEmpty = document.getElementById('emptyAreaDropdown').value === 'show';
+      if (!container || !DATA.areas) return;
+      
+      container.innerHTML = '';
+      const activePeople = getActivePeople();
+      
+      DATA.areas.forEach((area, index) => {
+        // Collect people matching this specific area
+        const peopleInArea = activePeople.filter(p => p.areas && p.areas.includes(area.id));
+        
+        // Hide logic based on dropdown
+        if (peopleInArea.length === 0 && !showEmpty) return;
+
+        const block = document.createElement('div');
+        block.className = 'simple-area-block';
+        
+        // NEW GREY COLOR LOGIC FOR EMPTY AREAS
+        if (peopleInArea.length === 0) {
+          block.style.background = '#94a3b8'; // Neutral Slate Grey
+        } else {
+          block.style.background = BLOCK_GRADIENTS[index % BLOCK_GRADIENTS.length];
+        }
+        
+        let cardsHtml = peopleInArea.length === 0 
+          ? '<div style="font-style: italic; opacity: 0.9; text-align: center; margin-top: 10px;">No personnel assigned</div>' 
+          : '';
+        
+        peopleInArea.forEach(p => {
+          // NEW STATUS DOT HTML (removes the green box)
+          cardsHtml += `
+            <div class="user-card">
+              <div class="card-header" style="margin-bottom: 5px;">
+                <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${p.name}'">
+                <div class="card-header-info">
+                  <b>${p.name}</b>
+                  <span class="role">${p.role || 'Operator'} - Shift ${p.shift || 1}</span>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: 5px;">
+                <div class="present-dot ${p.present ? 'green' : 'red'}" style="margin: 0 6px 0 0; width: 12px; height: 12px;"></div>
+                <span style="font-weight: 600; font-size: 13px; color: ${p.present ? '#0a8f3c' : '#d93025'};">${p.present ? 'Present' : 'Absent'}</span>
+              </div>
+            </div>
+          `;
+        });
+        
+        block.innerHTML = `
+          <div class="simple-area-title">
+            ${area.name}
+            <span class="area-count-badge">${peopleInArea.length} Assigned</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${cardsHtml}
+          </div>
+        `;
+        
+        container.appendChild(block);
+      });
+    }
+
+    function renderAreasMap() {
+      const container = document.getElementById('areaMap');
+      if (!container || !DATA.areas) return;
+      container.innerHTML = '';
+      const activePeople = getActivePeople();
+      DATA.areas.forEach(area => {
+        const peopleInArea = activePeople.filter(p => p.areas && p.areas.includes(area.id));
+        const div = document.createElement('div');
+        div.className = 'area-box';
+        div.style.left = (area.x || 50) + '%';
+        div.style.top = (area.y || 50) + '%';
+        if (area.layout && area.layout.size) div.style.width = area.layout.size + 'px';
+        const list = peopleInArea.length ? peopleInArea.map(p => `<div>${p.name} ${p.present ? '🟢' : '🔴'}</div>`).join('') : '<div class="idle">No assignment</div>';
+        div.innerHTML = `<div class="area-title">${area.name}</div>${list}`;
+        container.appendChild(div);
+      });
+    }
+
+    function renderAreaDetails() {
+      const dropdown = document.getElementById('areaDropdown');
+      const container = document.getElementById('areaPeople');
+      if (!dropdown || !container) return;
+      const areaId = dropdown.value;
+      container.innerHTML = '';
+      const activePeople = getActivePeople();
+      const people = areaId === 'idle' ? activePeople.filter(p => !p.areas || p.areas.length === 0) : activePeople.filter(p => p.areas && p.areas.includes(areaId));
+      if (people.length === 0) {
+        container.innerHTML = '<div style="color: #777; padding: 10px;">No workers assigned here.</div>';
+        return;
+      }
+      people.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'person-row';
+        div.innerHTML = `
+          <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name}" onerror="this.src='https://ui-avatars.com/api/?name=${p.name}'" />
+          <div class="person-info"><div class="person-name">${p.name}</div></div>
+          <div class="present-dot ${p.present ? 'green' : 'red'}"></div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateCircle(present, total) {
+      if (total === 0) return;
+      const deg = (present / total) * 360;
+      const circle = document.getElementById('presenceCircle');
+      if(circle) {
+        circle.style.background = `conic-gradient(#05920c 0deg ${deg}deg, #e74c3c ${deg}deg 360deg)`;
+      }
+      const pText = document.getElementById('percentText');
+      if(pText) pText.innerText = `${Math.round((present / total) * 100)}%`;
+      
+      const cText = document.getElementById('countText');
+      if(cText) cText.innerText = `${present}/${total}`;
+      renderLogTable();
+    }
+
+    function updateLastUpdated(ts) {
+      const el = document.getElementById('lastUpdatedText');
+      if (el) el.innerText = ts ? new Date(ts).toLocaleString() : '-';
+    }
+
+    function renderLogTable() {
+      const tbody = document.getElementById('logTable');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      let logs = DATA.dailyLogs || [];
+      const todayStr = new Date().toLocaleDateString('en-GB');
+      const active = getActivePeople();
+      const present = active.filter(p => p.present).length;
+      const total = active.length;
+      if (total > 0) {
+        const percent = Math.round((present / total) * 100);
+        let msg = `${percent}% were present at ${todayStr}`;
+        if (currentShiftView !== 'all') msg += ` (Shift ${currentShiftView})`;
+        const idx = logs.findIndex(l => l.date === todayStr);
+        if (idx >= 0) logs[idx].message = msg;
+        else logs.push({ date: todayStr, message: msg });
+      }
+      logs.sort((a, b) => {
+        const [da, ma, ya] = a.date.split('/');
+        const [db, mb, yb] = b.date.split('/');
+        return new Date(yb, mb-1, db) - new Date(ya, ma-1, da);
+      }).forEach(log => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${log.date}</td><td>${log.message}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function startPolling() {
+      reloadData();
+      setInterval(reloadData, 3000); 
+    }
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presence Monitor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+
+    .top-banner {
+      display: block;
+      width: 100%;
+      background: linear-gradient(90deg, #0c6dffd5, #054792);
       color: white;
       font-size: 36px;
       font-weight: 700;
       text-align: center;
       padding: 20px 0;
       letter-spacing: 2px;
-      box-shadow: none !important;
-      margin-bottom: 0 !important;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       z-index: 100;
       border: none;
     }
 
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }
+
+    .full-width {
+      grid-column: span 2;
+    }
+
+    h3 {
+      margin-top: 0;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+      color: #2c3e50;
+    }
+
+    /* Org Structure */
+    #org {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .person {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      color: white;
+      text-align: center;
+      min-width: 70px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 5px;
+      background: #ddd;
+    }
+
+    .present { background: #05920c; }
+    .absent { background: #e74c3c; }
+
+    /* Presence Overview */
+    .circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 20px auto;
+    }
+
+    .circle::before {
+      content: "";
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .circle-text {
+      position: relative;
+      text-align: center;
+      z-index: 1;
+    }
+
+    #percentText {
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    #countText {
+      font-size: 18px;
+      color: #555;
+    }
+
+    .header {
+      margin-top: 20px; 
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Filter Controls */
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .shift-btn-group {
+      display: flex;
+      gap: 5px;
+    }
+
+    .shift-btn {
+      padding: 6px 15px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #333;
+      transition: all 0.2s;
+    }
+
+    .shift-btn:hover {
+      background: #e0e0e0;
+    }
+
+    .shift-btn.active {
+      background: #05920c;
+      color: white;
+      border-color: #05920c;
+      font-weight: bold;
+    }
+
+    .status-select {
+      padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    /* NAVIGATION BAR */
     .nav-bar {
       background: rgba(245, 185, 39, 0.96);
       display: flex;
