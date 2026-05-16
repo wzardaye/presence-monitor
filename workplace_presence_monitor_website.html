@@ -35,7 +35,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       padding: 20px;
-      max-width: 1680px; /* Diperbesar dari 1200px agar card full-width lebih lebar */
+      max-width: 1650px; /* Diperbesar dari 1200px agar card full-width lebih lebar */
       margin: 0 auto;
       box-sizing: border-box;
     }
@@ -779,19 +779,23 @@
       const orgGroups = [
         { 
           name: "Dev Lead", 
-          filter: p => isLeadOrSpv(p)
+          filter: p => isLeadOrSpv(p),
+          color: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)' // Warna Gelap/Hitam
         },
         { 
           name: "Shift A", 
-          filter: p => (p.shift === 1 || String(p.shift).toUpperCase() === 'A') && !isLeadOrSpv(p)
+          filter: p => (p.shift === 1 || String(p.shift).toUpperCase() === 'A') && !isLeadOrSpv(p),
+          color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' // Warna Biru
         },
         { 
           name: "Shift B", 
-          filter: p => (p.shift === 2 || String(p.shift).toUpperCase() === 'B') && !isLeadOrSpv(p)
+          filter: p => (p.shift === 2 || String(p.shift).toUpperCase() === 'B') && !isLeadOrSpv(p),
+          color: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' // Warna Oranye/Kuning
         },
         { 
           name: "Non Shift", 
-          filter: p => p.shift !== 1 && p.shift !== 2 && String(p.shift).toUpperCase() !== 'A' && String(p.shift).toUpperCase() !== 'B' && !isLeadOrSpv(p)
+          filter: p => p.shift !== 1 && p.shift !== 2 && String(p.shift).toUpperCase() !== 'A' && String(p.shift).toUpperCase() !== 'B' && !isLeadOrSpv(p),
+          color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' // Warna Hijau
         }
       ];
 
@@ -808,11 +812,11 @@
         const block = document.createElement('div');
         block.className = 'simple-area-block';
         
-        // Warna abu-abu jika kosong sama sekali, sebaliknya gunakan gradien
+        // Warna abu-abu jika kosong sama sekali, sebaliknya gunakan warna grup
         if (peopleInGroup.length === 0) {
           block.style.background = '#94a3b8'; 
         } else {
-          block.style.background = BLOCK_GRADIENTS[index % BLOCK_GRADIENTS.length];
+          block.style.background = group.color;
         }
 
         let cardsHtml = peopleInGroup.length === 0 
