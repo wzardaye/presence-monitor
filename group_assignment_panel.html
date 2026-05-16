@@ -243,26 +243,33 @@
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       flex: 1;
-      min-height: 500px;
-      overflow: hidden;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border: 2px solid #e2e8f0;
+      overflow-x: auto;
     }
-    .factory-blueprint {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-image: url('images/layout.png');
-      background-size: cover;
-      background-position: center;
-      opacity: 0.8;
+    .blueprint-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 1200px; /* Menahan agar gambar peta 'zoomed out' tidak meraksasa di layar lebar */
+    }
+    .blueprint-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0.85;
+      border-radius: 8px;
     }
     .area-marker {
       position: absolute;
       background: rgba(255, 255, 255, 0.95);
       border: 2px solid #94a3b8;
       border-radius: 8px;
-      padding: 15px;
-      min-width: 160px;
-      min-height: 100px;
+      padding: 10px;
+      min-width: 130px;
+      min-height: 80px;
       transform: translate(-50%, -50%);
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       transition: all 0.2s;
@@ -285,7 +292,7 @@
       background: #eff6ff; 
       transform: translate(-50%, -50%) scale(1.05); 
     }
-    .area-marker b { display: block; color: #0f172a; font-size: 16px; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
+    .area-marker b { display: block; color: #0f172a; font-size: 15px; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
     .worker-row {
       display: flex; justify-content: space-between; align-items: center;
       background: #f8fafc; padding: 6px 10px; border-radius: 4px; margin-bottom: 5px;
@@ -355,8 +362,10 @@
       <h2 class="section-title" style="margin-top: 10px;">Interactive Map</h2>
       <!-- Map Container -->
       <div class="map-container" id="mapContainer">
-        <div class="factory-blueprint"></div>
-        <div id="markerLayer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+        <div class="blueprint-wrapper">
+          <img src="images/layout.png" class="blueprint-img" alt="Factory Blueprint" onerror="this.src='https://placehold.co/1200x600/e2e8f0/64748b?text=Factory+Blueprint'">
+          <div id="markerLayer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+        </div>
       </div>
 
       <h2 class="section-title" style="margin-top: 20px;">Selected Area Details</h2>
