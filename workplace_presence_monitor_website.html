@@ -18,7 +18,7 @@
       display: block;
       width: 100%;
       box-sizing: border-box;
-      background: linear-gradient(90deg, #f5b927f5, #ffb300);
+      background: linear-gradient(90deg, #0c6dffd5, #054792);
       color: white;
       font-size: 36px;
       font-weight: 700;
@@ -59,35 +59,6 @@
       padding-bottom: 10px;
       color: #2c3e50;
     }
-
-    /* Org Structure */
-    #org {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .person {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 8px;
-      color: white;
-      text-align: center;
-      min-width: 70px;
-    }
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-      margin: 0 auto 5px;
-      background: #ddd;
-    }
-
-    .present { background: #05920c; }
-    .absent { background: #e74c3c; }
 
     /* Presence Overview */
     .circle {
@@ -378,7 +349,7 @@
     /* ========================================= */
     .simple-view-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
       margin-top: 15px;
     }
@@ -494,7 +465,7 @@
     /* Responsive adjustments for mobile */
     @media (max-width: 768px) {
       .top-banner {
-        font-size: 22px; /* Dikecilkan agar muat satu baris */
+        font-size: 22px; 
         padding: 15px 10px;
       }
       .container { grid-template-columns: 1fr; padding: 10px; }
@@ -519,12 +490,21 @@
   <div class="container">
     
     <!-- Row 1 -->
-    <div class="card">
-      <h3>Organization Structure</h3>
-      <div id="org"></div>
+    <div class="card full-width">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+        <h3 style="border: none; padding: 0; margin: 0;">Organization Structure</h3>
+        <select id="orgVisibilityDropdown" onchange="renderOrg()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px;">
+          <option value="hide">Hide Absent & Empty</option>
+          <option value="show">Show Absent & Empty</option>
+        </select>
+      </div>
+      <div id="org" class="simple-view-container">
+        <!-- Generates Org Block Views here -->
+      </div>
     </div>
 
-    <div class="card">
+    <!-- Row 1.5: Presence Overview -->
+    <div class="card full-width">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
         <h3 style="border: none; padding: 0; margin: 0;">Presence Overview</h3>
         <div class="filter-group">
@@ -745,7 +725,7 @@
     }
 
     function renderAll() {
-      renderOrg();
+      renderOrg(); // Render the new structural view
       initAreaDropdown();
       renderSimpleAreas(); // Renders the new visual blocks
       renderAreasMap();
@@ -758,18 +738,95 @@
       updateCircle(presentCount, activePeople.length);
     }
 
+    // ==========================================
+    // NEW: Render the Organization Structure
+    // ==========================================
     function renderOrg() {
-      const org = document.getElementById('org');
-      if (!org) return;
-      org.innerHTML = '';
-      getActivePeople().forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'person ' + (p.present ? 'present' : 'absent');
-        div.innerHTML = `
-          <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${p.name}'">
-          <div>${p.name}</div>
+      const container = document.getElementById('org');
+      const showAbsentAndEmpty = document.getElementById('orgVisibilityDropdown').value === 'show';
+      if (!container || !DATA.people) return;
+      
+      container.innerHTML = '';
+      const allPeople = DATA.people;
+
+      // Mendefinisikan grup secara logis:
+      const orgGroups = [
+        { 
+          name: "Dev Lead", 
+          filter: p => p.role && p.role.toLowerCase().includes('lead') 
+        },
+        { 
+          name: "Shift A", 
+          filter: p => (p.shift === 1 || String(p.shift).toUpperCase() === 'A') && !(p.role && p.role.toLowerCase().includes('lead')) 
+        },
+        { 
+          name: "Shift B", 
+          filter: p => (p.shift === 2 || String(p.shift).toUpperCase() === 'B') && !(p.role && p.role.toLowerCase().includes('lead')) 
+        },
+        { 
+          name: "Non Shift", 
+          filter: p => p.shift !== 1 && p.shift !== 2 && String(p.shift).toUpperCase() !== 'A' && String(p.shift).toUpperCase() !== 'B' && !(p.role && p.role.toLowerCase().includes('lead')) 
+        }
+      ];
+
+      orgGroups.forEach((group, index) => {
+        let peopleInGroup = allPeople.filter(group.filter);
+
+        if (!showAbsentAndEmpty) {
+          peopleInGroup = peopleInGroup.filter(p => p.present);
+        }
+
+        // Jangan tampilkan jika grup kosong & disetel ke hide
+        if (peopleInGroup.length === 0 && !showAbsentAndEmpty) return;
+
+        const block = document.createElement('div');
+        block.className = 'simple-area-block';
+        
+        // Warna abu-abu jika kosong sama sekali, sebaliknya gunakan gradien
+        if (peopleInGroup.length === 0) {
+          block.style.background = '#94a3b8'; 
+        } else {
+          block.style.background = BLOCK_GRADIENTS[index % BLOCK_GRADIENTS.length];
+        }
+
+        let cardsHtml = peopleInGroup.length === 0 
+          ? '<div style="font-style: italic; opacity: 0.9; text-align: center; margin-top: 10px;">No personnel</div>' 
+          : '';
+
+        peopleInGroup.forEach(p => {
+          const isAbsent = !p.present;
+          // Memanipulasi CSS inline untuk kartu absen menjadi abu-abu/gelap
+          const cardStyle = isAbsent ? 'background: #cbd5e1; box-shadow: none;' : '';
+          const opacityStyle = isAbsent ? 'opacity: 0.85;' : '';
+          
+          cardsHtml += `
+            <div class="user-card" style="${cardStyle} ${opacityStyle}">
+              <div class="card-header" style="margin-bottom: 5px;">
+                <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${p.name}'" style="${isAbsent ? 'filter: grayscale(100%);' : ''}">
+                <div class="card-header-info">
+                  <b style="${isAbsent ? 'color: #334155;' : ''}">${p.name}</b>
+                  <span class="role" style="${isAbsent ? 'color: #475569;' : ''}">${p.role || 'Operator'} - Shift ${p.shift || 1}</span>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: 5px;">
+                <div class="present-dot ${isAbsent ? '' : 'green'}" style="margin: 0 6px 0 0; width: 12px; height: 12px; ${isAbsent ? 'background: #64748b;' : ''}"></div>
+                <span style="font-weight: 600; font-size: 13px; color: ${isAbsent ? '#475569' : '#0a8f3c'};">${isAbsent ? 'Absent' : 'Present'}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        block.innerHTML = `
+          <div class="simple-area-title">
+            ${group.name}
+            <span class="area-count-badge">${peopleInGroup.length} People</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${cardsHtml}
+          </div>
         `;
-        org.appendChild(div);
+        
+        container.appendChild(block);
       });
     }
 
@@ -1022,9 +1079,6 @@
       renderAreaDetails();
     }
 
-    // ==========================================
-    // NEW: Render the Simple Area Blocks
-    // ==========================================
     function renderSimpleAreas() {
       const container = document.getElementById('simpleGroupView');
       const showEmpty = document.getElementById('emptyAreaDropdown').value === 'show';
