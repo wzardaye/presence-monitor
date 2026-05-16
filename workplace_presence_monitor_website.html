@@ -350,7 +350,7 @@
     /* ========================================= */
     .simple-view-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
       gap: 20px;
       margin-top: 15px;
     }
@@ -1154,20 +1154,35 @@
           : '';
         
         peopleInArea.forEach(p => {
+          const isAbsent = !p.present;
+          const cardStyle = isAbsent ? 'background: #cbd5e1; box-shadow: none;' : '';
+          const opacityStyle = isAbsent ? 'opacity: 0.85;' : '';
+          
+          let absenceDetailsHtml = '';
+          if (isAbsent) {
+            absenceDetailsHtml = `
+              <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #94a3b8; display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-size: 11px; color: #b91c1c;"><strong>Reason:</strong> ${p.absenceReason || 'Not specified'}</span>
+                ${p.expectedReturn ? `<span style="font-size: 11px; color: #475569;"><strong>Return:</strong> ${new Date(p.expectedReturn).toLocaleDateString()}</span>` : ''}
+              </div>
+            `;
+          }
+
           cardsHtml += `
-            <div class="user-card">
+            <div class="user-card" style="${cardStyle} ${opacityStyle}">
               <div class="card-header" style="margin-bottom: 5px;">
-                <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${p.name}'">
+                <img src="${p.avatar || 'https://ui-avatars.com/api/?name=' + p.name}" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=${p.name}'" style="${isAbsent ? 'filter: grayscale(100%);' : ''}">
                 <div class="card-header-info">
-                  <b>${p.name}</b>
-                  <span class="role">${p.role || 'Operator'} - Shift ${p.shift || 1}</span>
-                  <span style="font-size: 11px; font-weight: bold; color: #0284c7; margin-top: 4px;">📍 ${area.name}</span>
+                  <b style="${isAbsent ? 'color: #334155;' : ''}">${p.name}</b>
+                  <span class="role" style="${isAbsent ? 'color: #475569;' : ''}">${p.role || 'Operator'} - Shift ${p.shift || 1}</span>
+                  <span style="font-size: 11px; font-weight: bold; color: ${isAbsent ? '#475569' : '#0284c7'}; margin-top: 4px;">📍 ${area.name}</span>
                 </div>
               </div>
               <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: 5px;">
-                <div class="present-dot ${p.present ? 'green' : 'red'}" style="margin: 0 6px 0 0; width: 12px; height: 12px;"></div>
-                <span style="font-weight: 600; font-size: 13px; color: ${p.present ? '#0a8f3c' : '#d93025'};">${p.present ? 'Present' : 'Absent'}</span>
+                <div class="present-dot ${isAbsent ? '' : 'green'}" style="margin: 0 6px 0 0; width: 12px; height: 12px; ${isAbsent ? 'background: #64748b;' : ''}"></div>
+                <span style="font-weight: 600; font-size: 13px; color: ${isAbsent ? '#475569' : '#0a8f3c'};">${isAbsent ? 'Absent' : 'Present'}</span>
               </div>
+              ${absenceDetailsHtml}
             </div>
           `;
         });
