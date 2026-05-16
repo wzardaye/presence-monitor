@@ -749,23 +749,25 @@
       container.innerHTML = '';
       const allPeople = DATA.people;
 
-      // Mendefinisikan grup secara logis:
+      // Mendefinisikan grup secara logis, menyertakan role Supervisor ke Dev Lead
+      const isLeadOrSpv = p => p.role && (p.role.toLowerCase().includes('lead') || p.role.toLowerCase().includes('supervisor'));
+
       const orgGroups = [
         { 
           name: "Dev Lead", 
-          filter: p => p.role && p.role.toLowerCase().includes('lead') 
+          filter: p => isLeadOrSpv(p)
         },
         { 
           name: "Shift A", 
-          filter: p => (p.shift === 1 || String(p.shift).toUpperCase() === 'A') && !(p.role && p.role.toLowerCase().includes('lead')) 
+          filter: p => (p.shift === 1 || String(p.shift).toUpperCase() === 'A') && !isLeadOrSpv(p)
         },
         { 
           name: "Shift B", 
-          filter: p => (p.shift === 2 || String(p.shift).toUpperCase() === 'B') && !(p.role && p.role.toLowerCase().includes('lead')) 
+          filter: p => (p.shift === 2 || String(p.shift).toUpperCase() === 'B') && !isLeadOrSpv(p)
         },
         { 
           name: "Non Shift", 
-          filter: p => p.shift !== 1 && p.shift !== 2 && String(p.shift).toUpperCase() !== 'A' && String(p.shift).toUpperCase() !== 'B' && !(p.role && p.role.toLowerCase().includes('lead')) 
+          filter: p => p.shift !== 1 && p.shift !== 2 && String(p.shift).toUpperCase() !== 'A' && String(p.shift).toUpperCase() !== 'B' && !isLeadOrSpv(p)
         }
       ];
 
