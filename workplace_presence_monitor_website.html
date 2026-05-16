@@ -924,6 +924,209 @@
       });
     }
 
+    function renderControlPanel() {
+      const tbody = document.getElementById('controlTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      getActivePeople().forEach((p) => {
+        const tr = document.createElement('tr');
+        let areaOptions = `<option value="idle">-- Idle --</option>`;
+        DATA.areas.forEach(a => {
+          const isSelected = p.areas && p.areas.includes(a.id) ? 'selected' : '';
+          areaOptions += `<option value="${a.id}" ${isSelected}>${a.name}</option>`;
+        });
+
+        let absenceSummary = '-';
+        if (!p.present) {
+          const reason = p.absenceReason || 'No reason';
+          const returnDate = p.expectedReturn ? `<div style="color: #777; margin-top: 2px;">Return: ${new Date(p.expectedReturn).toLocaleDateString()}</div>` : '';
+          absenceSummary = `<div style="font-weight: 500;">${reason}</div>${returnDate}`;
+        }
+
+        tr.innerHTML = `
+          <td><strong>${p.name}</strong></td>
+          <td>Shift ${p.shift || '-'}</td>
+          <td>
+            <label><input type="checkbox" onchange="handleControlChange('${p.id}', 'present', this.checked)" ${p.present ? 'checked' : ''}>
+            ${p.present ? 'Present' : 'Absent'}</label>
+          </td>
+          <td><select onchange="handleControlChange('${p.id}', 'area', this.value)">${areaOptions}</select></td>
+          <td style="font-size:11px;">${absenceSummary}</td>
+          <td>
+            ${!p.present ? `<button class="btn btn-small" style="margin:0;" onclick="openAbsenceModal('${p.id}')">Edit Reason</button>` : '-'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openAbsenceModal(personId) {
+      const person = DATA.people.find(p => p.id === personId);
+      if (!person) return;
+      
+      document.getElementById('targetPersonId').value = personId;
+      document.getElementById('modalTitle').innerText = `Absence Detail: ${person.name}`;
+      document.getElementById('absenceReasonInput').value = person.absenceReason || '';
+      document.getElementById('expectedReturnInput').value = person.expectedReturn || '';
+      
+      document.getElementById('absenceModal').style.display = 'flex';
+    }
+
+    function closeAbsenceModal() {
+      document.getElementById('absenceModal').style.display = 'none';
+    }
+
+    async function saveAbsenceDetails() {
+      const id = document.getElementById('targetPersonId').value;
+      const reason = document.getElementById('absenceReasonInput').value;
+      const returnDate = document.getElementById('expectedReturnInput').value;
+      
+      const person = DATA.people.find(p => p.id === id);
+      if (person) {
+        // 1. Optimistic UI Update (Update screen instantly)
+        person.absenceReason = reason;
+        person.expectedReturn = returnDate;
+        person.present = false; 
+        
+        isManualMode = true;
+        updateModeBadge();
+        saveToLocalStorageFallback();
+        closeAbsenceModal();
+
+        // 2. Background Sync: Send reason to MongoDB
+        try {
+          await fetch('/api/presence', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              id: id, 
+              present: false, 
+              reason: reason 
+            })
+          });
+        } catch (error) {
+          console.error("Failed to save reason to database:", error);
+        }
+      }
+    }
+
+    async function handleControlChange(personId, field, value) {
+      isManualMode = true;
+      updateModeBadge();
+      
+      const person = DATA.people.find(p => p.id === personId);
+      if (!person) return;
+
+      try {
+        if (field === 'present') {
+          person.present = value;
+          if (value) {
+            delete person.absenceReason;
+            delete person.expectedReturn;
+          }
+          await fetch('/api/presence', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: personId, present: value }) // Basic toggle doesnt send reason
+          });
+        } 
+        else if (field === 'area') {
+          person.areas = value === 'idle' ? [] : [value];
+          await fetch('/api/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: personId, areaId: value === 'idle' ? '' : value })
+          });
+        }
+        saveToLocalStorageFallback(); // Update UI
+      } catch (error) {
+        console.error("Error communicating with server:", error);
+      }
+    }
+
+    function saveToLocalStorageFallback() {
+      DATA.lastUpdated = new Date().toISOString();
+      localStorage.setItem('henkatenData_v4', JSON.stringify(DATA));
+      initData(DATA);
+    }
+
+    function applyInitialData() {
+      const text = document.getElementById('initialDataText').value;
+      try {
+        const parsed = JSON.parse(text);
+        isManualMode = true; 
+        updateModeBadge();
+        localStorage.setItem('henkatenData_v4', JSON.stringify(parsed));
+        initData(parsed);
+      } catch (err) {
+        document.getElementById('jsonError').style.display = 'block';
+      }
+    }
+
+    function resetToLiveMode() {
+      isManualMode = false;
+      updateModeBadge();
+      reloadData();
+    }
+
+    function updateModeBadge() {
+      const badge = document.getElementById('modeBadge');
+      if(badge) {
+        badge.className = isManualMode ? 'mode-indicator' : 'mode-indicator mode-live';
+        badge.innerText = isManualMode ? 'MANUAL / LOCAL OVERRIDE' : 'LIVE API MODE';
+      }
+    }
+
+    function reloadData() {
+      if (isManualMode) return;
+      fetch('/api/data?t=' + new Date().getTime())
+        .then(async res => {
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Server returned ${res.status}: ${errText.substring(0, 100)}`);
+          }
+          const contentType = res.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            const errText = await res.text();
+            throw new Error(`Expected JSON but got HTML. Response: ${errText.substring(0, 100)}`);
+          }
+          return res.json();
+        })
+        .then(data => initData(data))
+        .catch((err) => {
+          console.error("API FETCH FAILED:", err.message);
+          
+          if (!DATA.people || DATA.people.length === 0) {
+            console.warn("Could not reach API. Falling back to local/mock data.");
+            const savedData = localStorage.getItem('henkatenData_v4');
+            if (savedData) {
+              try { initData(JSON.parse(savedData)); } catch(e) { initData(MOCK_DATA); }
+            } else {
+              initData(MOCK_DATA);
+            }
+          }
+        });
+    }
+
+    function initAreaDropdown() {
+      const select = document.getElementById('areaDropdown');
+      if (!select || !DATA.areas) return;
+      const currentSelection = select.value;
+      select.innerHTML = '';
+      DATA.areas.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.name;
+        select.appendChild(opt);
+      });
+      const idleOption = document.createElement('option');
+      idleOption.value = 'idle';
+      idleOption.textContent = 'Idle / Unassigned';
+      select.appendChild(idleOption);
+      if (currentSelection) select.value = currentSelection;
+      renderAreaDetails();
+    }
+
     function renderSimpleAreas() {
       const container = document.getElementById('simpleGroupView');
       const showEmpty = document.getElementById('emptyAreaDropdown').value === 'show';
