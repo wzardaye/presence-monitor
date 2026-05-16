@@ -18,14 +18,15 @@
       display: block;
       width: 100%;
       box-sizing: border-box;
-      background: linear-gradient(90deg, #0c6dffd5, #054792);
+      background: rgba(245, 185, 39, 0.96);
       color: white;
       font-size: 36px;
       font-weight: 700;
       text-align: center;
       padding: 20px 10px;
       letter-spacing: 2px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: none !important;
+      margin-bottom: 0 !important;
       z-index: 100;
       border: none;
     }
@@ -152,7 +153,7 @@
     .nav-bar {
       background: rgba(245, 185, 39, 0.96);
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: wrap; /* Mencegah tombol meluap di HP */
       justify-content: center;
       gap: 10px;
       padding: 12px;
