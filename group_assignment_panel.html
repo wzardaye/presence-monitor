@@ -54,7 +54,7 @@
     /* Layout */
     .main-container {
       display: flex;
-      max-width: 1700px;
+      max-width: 1650px;
       margin: 20px auto;
       gap: 20px;
       padding: 0 20px;
@@ -352,12 +352,6 @@
         </select>
       </div>
 
-      <h2 class="section-title">Area Overview</h2>
-      <!-- Simple Blocks View Container -->
-      <div id="simpleGroupView" class="simple-view-container">
-         <!-- Gradient blocks will generate here -->
-      </div>
-
       <h2 class="section-title" style="margin-top: 10px;">Interactive Map</h2>
       <!-- Map Container -->
       <div class="map-container" id="mapContainer">
@@ -531,16 +525,13 @@
         list.appendChild(card);
       });
 
-      /* 2. Render Simple Area Blocks View & 3. Render Map Markers */
-      const simpleView = document.getElementById('simpleGroupView');
-      simpleView.innerHTML = '';
-
+      /* 2. Render Map Markers */
       const layer = document.getElementById('markerLayer');
       layer.innerHTML = '';
       
       data.areas.forEach((area, index) => {
         
-        // ---- A. Data for Filtered Views (Overview blocks & Map markers) ----
+        // ---- A. Data for Filtered Views (Map markers) ----
         let filteredPeopleInArea = [];
         data.people.forEach(person => {
           if (shiftValue !== 'all' && (!person.shift || String(person.shift) !== shiftValue)) return;
@@ -554,36 +545,6 @@
             filteredPeopleInArea.push(person);
           }
         });
-
-        // --- Render logic for Simple View ---
-        if (filteredPeopleInArea.length > 0 || showEmptyAreas) {
-          const block = document.createElement('div');
-          block.className = 'simple-area-block';
-          if (filteredPeopleInArea.length === 0) {
-            block.style.background = '#94a3b8'; // Grey if empty
-          } else {
-            block.style.background = BLOCK_GRADIENTS[index % BLOCK_GRADIENTS.length];
-          }
-          
-          let cardsHtml = filteredPeopleInArea.length === 0 
-            ? '<div style="font-style: italic; opacity: 0.9; text-align: center; margin-top: 10px;">No personnel assigned</div>' 
-            : '';
-
-          filteredPeopleInArea.forEach(p => {
-             cardsHtml += generateUserCardHTML(p, area.name);
-          });
-
-          block.innerHTML = `
-            <h3 class="simple-area-title">
-              ${area.name} 
-              <span class="area-count-badge">${filteredPeopleInArea.length} Assigned</span>
-            </h3>
-            <div class="simple-cards-grid">
-              ${cardsHtml}
-            </div>
-          `;
-          simpleView.appendChild(block);
-        }
 
         // --- Render logic for Map View ---
         const marker = document.createElement('div');
