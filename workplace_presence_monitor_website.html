@@ -152,7 +152,7 @@
     .nav-bar {
       background: rgba(245, 185, 39, 0.96);
       display: flex;
-      flex-wrap: wrap; /* Mencegah tombol meluap di HP */
+      flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
       padding: 12px;
@@ -186,7 +186,7 @@
     /* Tables */
     .table-responsive {
       width: 100%;
-      overflow-x: auto; /* Kunci mengatasi tabel meluap di HP */
+      overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
     
@@ -194,7 +194,7 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
-      min-width: 500px; /* Menjaga struktur tabel */
+      min-width: 500px; 
     }
 
     th, td {
@@ -345,7 +345,7 @@
     .present-dot.red { background: #e74c3c; }
 
     /* ========================================= */
-    /* NEW: Simple Area Assignments Section      */
+    /* Area Assignments Section                  */
     /* ========================================= */
     .simple-view-container {
       display: grid;
@@ -353,6 +353,32 @@
       gap: 20px;
       margin-top: 15px;
     }
+    
+    /* NEW: Horizontal Scroll Container for Org Structure */
+    .org-horizontal-container {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 15px;
+      margin-top: 15px;
+    }
+    .org-horizontal-container::-webkit-scrollbar {
+      height: 8px;
+    }
+    .org-horizontal-container::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+    .org-horizontal-container::-webkit-scrollbar-track {
+      background: #e2e8f0;
+      border-radius: 4px;
+    }
+    .org-horizontal-container .simple-area-block {
+      min-width: 300px;
+      flex: 0 0 auto; /* Mencegah block menyusut */
+    }
+
     .simple-area-block {
       border-radius: 12px;
       padding: 16px;
@@ -489,7 +515,7 @@
   
   <div class="container">
     
-    <!-- Row 1 -->
+    <!-- Row 1: Organization Structure (Now Horizontal) -->
     <div class="card full-width">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
         <h3 style="border: none; padding: 0; margin: 0;">Organization Structure</h3>
@@ -498,7 +524,7 @@
           <option value="show">Show Absent & Empty</option>
         </select>
       </div>
-      <div id="org" class="simple-view-container">
+      <div id="org" class="org-horizontal-container">
         <!-- Generates Org Block Views here -->
       </div>
     </div>
@@ -684,8 +710,6 @@
     };
 
     window.onload = () => {
-      // FIX 1: Prevent double-fetching on load. 
-      // startPolling() handles both the initial load and the timer!
       startPolling();
     };
 
@@ -725,7 +749,7 @@
     }
 
     function renderAll() {
-      renderOrg(); // Render the new structural view
+      renderOrg(); // Render the new structural view (horizontal)
       initAreaDropdown();
       renderSimpleAreas(); // Renders the new visual blocks
       renderAreasMap();
@@ -739,7 +763,7 @@
     }
 
     // ==========================================
-    // NEW: Render the Organization Structure
+    // Render the Organization Structure
     // ==========================================
     function renderOrg() {
       const container = document.getElementById('org');
@@ -797,7 +821,6 @@
 
         peopleInGroup.forEach(p => {
           const isAbsent = !p.present;
-          // Memanipulasi CSS inline untuk kartu absen menjadi abu-abu/gelap
           const cardStyle = isAbsent ? 'background: #cbd5e1; box-shadow: none;' : '';
           const opacityStyle = isAbsent ? 'opacity: 0.85;' : '';
           
@@ -1026,17 +1049,14 @@
       }
     }
 
-    // FIX 2: Added deep error inspection to reloadData
     function reloadData() {
       if (isManualMode) return;
       fetch('/api/data?t=' + new Date().getTime())
         .then(async res => {
-          // If Vercel throws an error (like a 500 crash or 404), catch it here!
           if (!res.ok) {
             const errText = await res.text();
             throw new Error(`Server returned ${res.status}: ${errText.substring(0, 100)}`);
           }
-          // If Vercel accidentally returns an HTML page instead of JSON, catch it here!
           const contentType = res.headers.get("content-type");
           if (!contentType || !contentType.includes("application/json")) {
             const errText = await res.text();
@@ -1046,10 +1066,8 @@
         })
         .then(data => initData(data))
         .catch((err) => {
-          // THIS will print the true error to your console so we can debug it
           console.error("API FETCH FAILED:", err.message);
           
-          // Only fallback to Mock Data if the screen is currently completely empty
           if (!DATA.people || DATA.people.length === 0) {
             console.warn("Could not reach API. Falling back to local/mock data.");
             const savedData = localStorage.getItem('henkatenData_v4');
@@ -1111,7 +1129,6 @@
           : '';
         
         peopleInArea.forEach(p => {
-          // NEW STATUS DOT HTML (removes the green box)
           cardsHtml += `
             <div class="user-card">
               <div class="card-header" style="margin-bottom: 5px;">
