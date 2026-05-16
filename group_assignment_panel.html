@@ -1,27 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <title>Group Assignment Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Group Assignment Panel</title>
   <style>
-    /* Reset and Layout Fix */
-    * {
+    /* Global Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f1f5f9;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
+      color: #333;
     }
 
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f4f6f8;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* 1. ORANGE TOP BANNER */
+    /* Fixed Nav & Banner */
     .top-banner {
       background: rgba(245, 185, 39, 0.96);
       color: white;
@@ -30,339 +23,381 @@
       text-align: center;
       padding: 20px 0;
       letter-spacing: 2px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: none !important;
+      margin-bottom: 0 !important;
       z-index: 100;
       border: none;
     }
-
-    /* 2. ORANGE NAVIGATION BAR */
     .nav-bar {
       background: rgba(245, 185, 39, 0.96);
       display: flex;
       justify-content: center;
       gap: 20px;
       padding: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-top: 0 !important;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 99;
     }
-
-    .nav-bar a {
+    .nav-link {
       color: white;
       text-decoration: none;
-      font-size: 14px;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 16px;
       padding: 8px 16px;
       border-radius: 6px;
       transition: background 0.2s;
     }
+    .nav-link:hover { background: rgba(255, 255, 255, 0.2); }
+    .nav-link.active { background: white; color: #f5b927; }
 
-    .nav-bar a:hover {
-      background: rgba(0, 0, 0, 0.1);
-    }
-    
-    .nav-bar a.active {
-      background: rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(0, 0, 0, 0.2);
-    }
-
-    /* Container for the rest of the app */
-    .app-container {
-      padding: 20px;
-      flex: 1;
+    /* Layout */
+    .main-container {
       display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      max-width: 1650px;
+      margin: 20px auto;
       gap: 20px;
+      padding: 0 20px;
+      height: calc(100vh - 180px);
     }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .header h1 {
-      margin: 0;
-      color: #1e293b;
-      font-size: 24px;
-    }
-
-    .status-text {
-      color: #64748b;
-      font-size: 14px;
-    }
-
-    /* SPLIT LAYOUT */
-    .layout {
-      display: flex;
-      gap: 20px;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    /* LEFT SIDEBAR */
+    /* Sidebar (Unassigned / List) */
     .sidebar {
-      width: 400px;
+      width: 320px;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      flex-shrink: 0;
     }
-
     .sidebar-header {
-      padding: 12px 16px;
-      background: #fffdf5; /* Tinted to match orange theme */
-      border-bottom: 1px solid #e2e8f0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      border-left: 4px solid rgba(245, 185, 39, 0.96);
-    }
-
-    .sidebar-header-top {
+      background: #1e293b;
+      color: white;
+      padding: 15px 20px;
+      font-size: 18px;
+      font-weight: 600;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-
-    .sidebar-title {
-      font-weight: 600;
-      color: #7b5906;
-      font-size: 14px;
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 6px;
-    }
-
-    .status-filter {
-      flex: 1;
-      padding: 4px 4px;
-      border-radius: 6px;
-      border: 1px solid rgba(245, 185, 39, 0.96);
-      font-size: 10px;
-      color: #a37500;
-      background: white;
-      outline: none;
-      font-weight: bold;
-    }
-
-    .people-list {
+    .sidebar-list {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      padding: 15px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
+    /* Employee Mini-Cards (Sidebar) */
     .employee-card {
-      background: #ffffff;
+      background: #f8fafc;
       border: 1px solid #e2e8f0;
+      padding: 10px;
       border-radius: 8px;
-      padding: 12px;
       display: flex;
       align-items: center;
       gap: 12px;
       cursor: grab;
-      transition: 0.2s;
+      transition: all 0.2s;
+    }
+    .employee-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transform: translateY(-2px); }
+    .employee-card:active { cursor: grabbing; }
+    .emp-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
+    .emp-info { flex: 1; display: flex; flex-direction: column; }
+    .emp-name { font-weight: 600; font-size: 14px; color: #1e293b; }
+    .emp-area { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .green { background: #0a8f3c; }
+    .red { background: #d93025; }
+
+    /* Content Area */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    /* Controls */
+    .controls-bar {
+      display: flex;
+      gap: 15px;
+      background: white;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .filter-select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      outline: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1e293b;
+      cursor: pointer;
+    }
+
+    /* ========================================= */
+    /* Group Assignment & Detail View Styles     */
+    /* ========================================= */
+    .simple-view-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .simple-area-block {
+      border-radius: 16px;
+      padding: 20px;
+      color: white;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .simple-area-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .area-count-badge {
+      font-size: 14px;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    
+    /* Dedicated Styling for Selected Area Bottom Block */
+    #selectedAreaDetails .simple-area-block {
+      grid-column: 1 / -1; /* Make it full width */
+    }
+    #selectedAreaDetails .simple-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+
+    /* Modern User Cards */
+    .simple-cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .user-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+      color: #333; 
+    }
+    .user-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+    .user-card .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 5px;
       position: relative;
     }
-
-    .employee-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      transform: translateY(-2px);
-    }
-
-    .emp-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+    .user-card .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
       background: #e2e8f0;
       object-fit: cover;
+      margin: 0; 
     }
-
-    .emp-info { flex: 1; }
-    .emp-name { font-weight: 600; color: #1e293b; font-size: 15px; }
-    .emp-area { font-size: 12px; color: #64748b; }
-
-    /* MAIN MAP AREA */
-    .main-content {
-      flex: 1;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #mapWrapper {
-      position: relative;
-      max-width: 100%;
-      max-height: 100%;
-      display: inline-block;
-    }
-
-    #layoutImg {
-      display: block;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    /* AREA MARKERS */
-    .area-marker {
-      position: absolute;
-      background: rgba(30, 41, 59, 0.9);
-      color: white;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 12px;
-      text-align: center;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      z-index: 10;
-      min-width: 110px;
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-
-    .area-marker b {
-      display: block;
-      color: rgba(245, 185, 39, 0.96); /* Changed marker title to orange */
-      margin-bottom: 4px;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-      padding-bottom: 4px;
-      font-size: 13px;
-    }
-
-    /* WORKER ROW AND DOT STYLING */
-    .worker-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 2px;
-      padding: 2px 4px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .worker-row:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .status-dot {
+    .user-card .card-header-info { display: flex; flex-direction: column; }
+    .user-card .card-header-info b { font-size: 16px; color: #1e293b; margin-bottom: 2px; }
+    .user-card .role { font-size: 12px; color: #64748b; }
+    .present-dot {
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      margin-left: 10px;
     }
+    .present-dot.green { background: #05920c; }
+    .present-dot.red { background: #e74c3c; }
 
-    .status-dot.green {
-      background: radial-gradient(circle at 3px 3px, #58ff85, #0a8f3c);
+    /* ========================================= */
+    /* Map View Styles                           */
+    /* ========================================= */
+    .map-container {
+      position: relative;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      flex: 1;
+      min-height: 500px;
+      overflow: hidden;
+      border: 2px solid #e2e8f0;
     }
-
-    .status-dot.red {
-      background: radial-gradient(circle at 3px 3px, #ff8585, #d93025);
-    }
-
-    .sidebar-dot {
+    .factory-blueprint {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: 
+        linear-gradient(#f1f5f9 2px, transparent 2px),
+        linear-gradient(90deg, #f1f5f9 2px, transparent 2px),
+        linear-gradient(#e2e8f0 1px, transparent 1px),
+        linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+      background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+      background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+      opacity: 0.5;
     }
+    .area-marker {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid #94a3b8;
+      border-radius: 8px;
+      padding: 15px;
+      min-width: 160px;
+      min-height: 100px;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+      cursor: pointer; /* Makes it look clickable */
+    }
+    .area-marker:hover {
+      border-color: #64748b;
+      transform: translate(-50%, -50%) scale(1.02);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+    .area-marker.selected {
+      border-color: #f5b927; /* Gold highlight for selected */
+      box-shadow: 0 0 0 4px rgba(245, 185, 39, 0.3);
+      background: #fffbeb;
+      transform: translate(-50%, -50%) scale(1.05);
+      z-index: 10;
+    }
+    .area-marker.drag-over { 
+      border-color: #3b82f6; 
+      background: #eff6ff; 
+      transform: translate(-50%, -50%) scale(1.05); 
+    }
+    .area-marker b { display: block; color: #0f172a; font-size: 16px; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
+    .worker-row {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f8fafc; padding: 6px 10px; border-radius: 4px; margin-bottom: 5px;
+      font-size: 13px; font-weight: 500; border: 1px solid #e2e8f0;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .worker-row:hover { background: #fee2e2; border-color: #fca5a5; }
 
-    .area-marker.drag-over {
-      background: rgba(245, 185, 39, 0.96); /* Highlight orange when dragging */
-      transform: translate(-50%, -50%) scale(1.1);
-      border-color: #fff;
-    }
-
-    #mockWarning {
-      display: none; 
-      background: #fee2e2; 
-      color: #991b1b; 
-      padding: 15px; 
-      border-radius: 8px; 
-      margin-bottom: 15px; 
-      border: 1px solid #fecaca;
-      font-weight: 600;
-    }
+    .warning-banner { background: #fee2e2; color: #991b1b; padding: 10px; text-align: center; font-weight: bold; display: none; }
+    .section-title { color: #1e293b; margin: 10px 0 0 0; font-size: 22px; }
   </style>
 </head>
-
 <body>
 
-  <div class="top-banner">MER-C HENKATEN BOARD</div>
-
-  <!-- NAVIGATION BAR (Map is Active) -->
+  <div class="top-banner">WORKPLACE PRESENCE MONITOR</div>
   <div class="nav-bar">
-    <a href="/">Dashboard</a>
-    <a href="/control">Control Panel</a>
-    <a href="/map" class="active">Grouping Map</a>
+    <a href="/" class="nav-link">Main Dashboard</a>
+    <a href="/control" class="nav-link">Control Panel</a>
+    <a href="/map" class="nav-link active">Group Assignment Map</a>
   </div>
 
-  <div class="app-container">
-    <div id="mockWarning">
-      ⚠️ BACKEND ERROR: The server returned NO DATA or is unreachable. Connecting to fallback mode.
-    </div>
+  <div id="mockWarning" class="warning-banner">⚠️ Cannot reach server. Displaying cached data.</div>
 
-    <div class="header">
-      <h1>Group Assignment Map</h1>
-      <div class="status-text">
-        Last Updated: <span id="lastUpdatedText">-</span>
+  <div class="main-container">
+    
+    <!-- Sidebar: Draggable Roster -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        Roster
+        <span id="lastUpdatedText" style="font-size: 12px; font-weight: 400; color: #cbd5e1;">-</span>
+      </div>
+      <div class="sidebar-list" id="peopleList" 
+           ondragover="event.preventDefault();" 
+           ondrop="handleDropToIdle(event)">
+        <!-- Employee Cards generated here -->
       </div>
     </div>
 
-    <div class="layout">
-      <div class="sidebar">
-        <div class="sidebar-header">
-          <div class="sidebar-header-top">
-            <div class="sidebar-title">Employee List</div>
-          </div>
-          <div class="filter-group">
-            <select id="shiftDropdown" class="status-filter" onchange="renderUI(DATA)">
-              <option value="all">All Shifts</option>
-              <option value="1">Shift 1</option>
-              <option value="2">Shift 2</option>
-            </select>
-            <select id="filterDropdown" class="status-filter" onchange="renderUI(DATA)">
-              <option value="all">All Tasking</option>
-              <option value="idle">Idle Only</option>
-              <option value="assigned">Assigned Only</option>
-            </select>
-            <select id="presenceDropdown" class="status-filter" onchange="renderUI(DATA)">
-              <option value="all">All Presence</option>
-              <option value="present">Present Only</option>
-              <option value="absent">Absent Only</option>
-            </select>
-          </div>
-        </div>
-        <div class="people-list" id="peopleList"></div>
+    <!-- Main Content Area -->
+    <div class="content" id="scrollContent">
+      
+      <!-- Filters & Toggles -->
+      <div class="controls-bar">
+        <select id="shiftDropdown" class="filter-select" onchange="renderUI(DATA)">
+          <option value="all">All Shifts</option>
+          <option value="1">Shift 1</option>
+          <option value="2">Shift 2</option>
+        </select>
+        <select id="presenceDropdown" class="filter-select" onchange="renderUI(DATA)">
+          <option value="all">All Status</option>
+          <option value="present">Present Only</option>
+          <option value="absent">Absent Only</option>
+        </select>
+        <select id="filterDropdown" class="filter-select" onchange="renderUI(DATA)">
+          <option value="all">All Personnel</option>
+          <option value="assigned">Assigned Only</option>
+          <option value="idle">Idle / Unassigned</option>
+        </select>
+        
+        <!-- Empty Area Toggle -->
+        <select id="emptyAreaDropdown" class="filter-select" onchange="renderUI(DATA)" style="margin-left: auto; background: #fffbeb; border-color: #f5b927;">
+          <option value="hide">Hide Empty Areas</option>
+          <option value="show">Show Empty Areas</option>
+        </select>
       </div>
 
-      <div class="main-content">
-        <div id="mapWrapper">
-          <img id="layoutImg" src="images/layout.png" onerror="this.src='https://placehold.co/1000x400/e0e0e0/888?text=Map+Layout+Image'">
-          <div id="markerLayer"></div>
-        </div>
+      <h2 class="section-title">Area Overview</h2>
+      <!-- Simple Blocks View Container -->
+      <div id="simpleGroupView" class="simple-view-container">
+         <!-- Gradient blocks will generate here -->
       </div>
+
+      <h2 class="section-title" style="margin-top: 10px;">Interactive Map</h2>
+      <!-- Map Container -->
+      <div class="map-container" id="mapContainer">
+        <div class="factory-blueprint"></div>
+        <div id="markerLayer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+      </div>
+
+      <h2 class="section-title" style="margin-top: 20px;">Selected Area Details</h2>
+      <div id="selectedAreaDetails" class="simple-view-container">
+         <!-- Detailed area information generates here -->
+         <div style="padding: 20px; color: #64748b; font-style: italic; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
+           Click an area marker on the map to view the full detailed roster.
+         </div>
+      </div>
+      <!-- Spacer for padding at bottom -->
+      <div style="height: 40px;"></div>
     </div>
   </div>
 
-<script>
+  <script>
     let FALLBACK_AVATAR = "images/0Br.png";
     let DATA = { people: [], areas: [] };
+    let selectedMapAreaId = null; // Tracks which marker is clicked
+
+    // Gorgeous gradients for the Area Blocks
+    const BLOCK_GRADIENTS = [
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', // Blue
+      'linear-gradient(135deg, #f6d365 0%, #fda085 100%)', // Orange/Yellow
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', // Green
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', // Pink/Yellow
+      'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)', // Purple
+      'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)', // Red
+    ];
 
     function reloadData() {
-      // FIX: Add timestamp to bypass Vercel Caching
+      // Bypass Vercel Caching with timestamp
       fetch('/api/data?t=' + new Date().getTime())
         .then(res => {
           if (!res.ok) throw new Error("API not reachable");
@@ -380,7 +415,7 @@
     }
 
     function performMove(userId, targetAreaId) {
-      // FIX: Optimistic Update! Move the worker instantly on screen
+      // Optimistic Update! Move the worker instantly on screen
       const person = DATA.people.find(p => p.id === userId);
       if (person) {
         person.areas = targetAreaId ? [targetAreaId] : [];
@@ -395,6 +430,60 @@
       }).catch(err => console.error("Error moving user:", err));
     }
 
+    function handleDropToIdle(e) {
+      e.preventDefault();
+      const userId = e.dataTransfer.getData('text/plain');
+      if (userId) performMove(userId, "");
+    }
+
+    function selectArea(areaId) {
+      // Set State
+      selectedMapAreaId = areaId;
+      
+      // Re-render UI to apply highlights and populate the bottom detail block
+      renderUI(DATA);
+
+      // Smooth scroll the content area down to the details block
+      setTimeout(() => {
+        document.getElementById('selectedAreaDetails').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+
+    // Extracted Card Generator for re-usability (creates the nice square cards)
+    function generateUserCardHTML(p, areaName) {
+      const isAbsent = !p.present;
+      const cardStyle = isAbsent ? 'background: #cbd5e1; box-shadow: none;' : '';
+      const opacityStyle = isAbsent ? 'opacity: 0.85;' : '';
+      
+      let absenceDetailsHtml = '';
+      if (isAbsent) {
+        absenceDetailsHtml = `
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #94a3b8; display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 11px; color: #b91c1c;"><strong>Reason:</strong> ${p.absenceReason || 'Not specified'}</span>
+            ${p.expectedReturn ? `<span style="font-size: 11px; color: #475569;"><strong>Return:</strong> ${new Date(p.expectedReturn).toLocaleDateString()}</span>` : ''}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="user-card" style="${cardStyle} ${opacityStyle}">
+          <div class="card-header">
+            <img src="${p.avatar || ''}" class="avatar" onerror="this.onerror=null; this.src='${FALLBACK_AVATAR}';" style="${isAbsent ? 'filter: grayscale(100%);' : ''}">
+            <div class="card-header-info">
+              <b style="${isAbsent ? 'color: #334155;' : ''}">${p.name}</b>
+              <span class="role" style="${isAbsent ? 'color: #475569;' : ''}">${p.role || 'Operator'} - Shift ${p.shift || 1}</span>
+              <span style="font-size: 11px; font-weight: bold; color: ${isAbsent ? '#475569' : '#0284c7'}; margin-top: 4px;">📍 ${areaName}</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: 5px;">
+            <div class="present-dot ${isAbsent ? '' : 'green'}" style="margin: 0 6px 0 0; width: 12px; height: 12px; ${isAbsent ? 'background: #64748b;' : ''}"></div>
+            <span style="font-weight: 600; font-size: 13px; color: ${isAbsent ? '#475569' : '#0a8f3c'};">${isAbsent ? 'Absent' : 'Present'}</span>
+          </div>
+          ${absenceDetailsHtml}
+        </div>
+      `;
+    }
+
     function renderUI(data) {
       const lastUpdatedText = document.getElementById('lastUpdatedText');
       if (lastUpdatedText) {
@@ -404,13 +493,15 @@
       const filterValue = document.getElementById('filterDropdown').value;
       const shiftValue = document.getElementById('shiftDropdown').value;
       const presenceValue = document.getElementById('presenceDropdown').value;
+      const showEmptyAreas = document.getElementById('emptyAreaDropdown').value === 'show';
 
+      /* 1. Render Sidebar (Roster) */
       const list = document.getElementById('peopleList');
       list.innerHTML = '';
       
       data.people.forEach(p => {
         if (shiftValue !== 'all' && (!p.shift || String(p.shift) !== shiftValue)) return;
-
+        
         const isAssigned = (p.areas && p.areas.length > 0 && p.areas[0] !== "" && p.areas[0] !== null);
         if (filterValue === 'idle' && isAssigned) return;
         if (filterValue === 'assigned' && !isAssigned) return;
@@ -439,36 +530,87 @@
             <div class="emp-area">${areaName}${shiftLabel}</div>
           </div>
           <span class="status-dot ${dotClass} sidebar-dot"></span>
-          <div style="color: #cbd5e1; margin-left: 10px;">⋮⋮</div>`;
+          <div style="color: #cbd5e1; margin-left: 10px; cursor: grab;">⋮⋮</div>`;
           
         list.appendChild(card);
       });
 
+      /* 2. Render Simple Area Blocks View & 3. Render Map Markers */
+      const simpleView = document.getElementById('simpleGroupView');
+      simpleView.innerHTML = '';
+
       const layer = document.getElementById('markerLayer');
       layer.innerHTML = '';
       
-      data.areas.forEach(area => {
-        const marker = document.createElement('div');
-        marker.className = 'area-marker';
+      data.areas.forEach((area, index) => {
         
-        let occsHtml = '';
+        // ---- A. Data for Filtered Views (Overview blocks & Map markers) ----
+        let filteredPeopleInArea = [];
         data.people.forEach(person => {
           if (shiftValue !== 'all' && (!person.shift || String(person.shift) !== shiftValue)) return;
           if (presenceValue === 'present' && !person.present) return;
           if (presenceValue === 'absent' && person.present) return;
-
           const isPersAssigned = (person.areas && person.areas.length > 0 && person.areas[0] !== "" && person.areas[0] !== null);
           if (filterValue === 'idle' && isPersAssigned) return;
           if (filterValue === 'assigned' && !isPersAssigned) return;
 
           if (person.areas && person.areas.includes(area.id)) {
-            const dotColor = person.present ? 'green' : 'red';
-            occsHtml += `
-              <div class="worker-row" title="Double-click to remove" ondblclick="performMove('${person.id}', '')">
-                <span>${person.name}</span>
-                <span class="status-dot ${dotColor}"></span>
-              </div>`;
+            filteredPeopleInArea.push(person);
           }
+        });
+
+        // --- Render logic for Simple View ---
+        if (filteredPeopleInArea.length > 0 || showEmptyAreas) {
+          const block = document.createElement('div');
+          block.className = 'simple-area-block';
+          if (filteredPeopleInArea.length === 0) {
+            block.style.background = '#94a3b8'; // Grey if empty
+          } else {
+            block.style.background = BLOCK_GRADIENTS[index % BLOCK_GRADIENTS.length];
+          }
+          
+          let cardsHtml = filteredPeopleInArea.length === 0 
+            ? '<div style="font-style: italic; opacity: 0.9; text-align: center; margin-top: 10px;">No personnel assigned</div>' 
+            : '';
+
+          filteredPeopleInArea.forEach(p => {
+             cardsHtml += generateUserCardHTML(p, area.name);
+          });
+
+          block.innerHTML = `
+            <h3 class="simple-area-title">
+              ${area.name} 
+              <span class="area-count-badge">${filteredPeopleInArea.length} Assigned</span>
+            </h3>
+            <div class="simple-cards-grid">
+              ${cardsHtml}
+            </div>
+          `;
+          simpleView.appendChild(block);
+        }
+
+        // --- Render logic for Map View ---
+        const marker = document.createElement('div');
+        marker.className = 'area-marker';
+        if (area.id === selectedMapAreaId) {
+          marker.classList.add('selected'); // Highlight if selected
+        }
+        
+        // Clicking marker selects it for the Details panel
+        marker.onclick = function(e) {
+          // Do not trigger if double clicking a worker row (to remove them)
+          if (e.target.closest('.worker-row')) return;
+          selectArea(area.id);
+        };
+        
+        let occsHtml = '';
+        filteredPeopleInArea.forEach(person => {
+          const dotColor = person.present ? 'green' : 'red';
+          occsHtml += `
+            <div class="worker-row" title="Double-click to remove" ondblclick="performMove('${person.id}', '')">
+              <span>${person.name}</span>
+              <span class="status-dot ${dotColor}"></span>
+            </div>`;
         });
 
         let posX = 50, posY = 50;
@@ -478,7 +620,7 @@
         marker.style.top = posY + '%';
         if (area.layout && area.layout.size) marker.style.width = area.layout.size + 'px';
 
-        marker.innerHTML = `<b>${area.name}</b>${occsHtml || '<span style="color:#94a3b8;">Empty</span>'}`;
+        marker.innerHTML = `<b>${area.name}</b>${occsHtml || '<span style="color:#94a3b8; pointer-events: none;">Empty</span>'}`;
 
         marker.ondragover = function(e) { e.preventDefault(); marker.classList.add('drag-over'); };
         marker.ondragleave = function() { marker.classList.remove('drag-over'); };
@@ -491,6 +633,52 @@
 
         layer.appendChild(marker);
       });
+
+      /* 4. Render Selected Area Details Block (Bottom) */
+      const detailsContainer = document.getElementById('selectedAreaDetails');
+      detailsContainer.innerHTML = ''; // Reset
+
+      if (!selectedMapAreaId) {
+        detailsContainer.innerHTML = '<div style="padding: 20px; color: #64748b; font-style: italic; background: white; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%;">Click an area marker on the map to view the full detailed roster.</div>';
+      } else {
+        const targetArea = data.areas.find(a => a.id === selectedMapAreaId);
+        if (targetArea) {
+          // Bypassing filters: Pull ALL people assigned to this area
+          const allPeopleInArea = data.people.filter(p => p.areas && p.areas.includes(selectedMapAreaId));
+          const areaIndex = data.areas.findIndex(a => a.id === selectedMapAreaId);
+
+          const detailBlock = document.createElement('div');
+          detailBlock.className = 'simple-area-block';
+          
+          if (allPeopleInArea.length === 0) {
+            detailBlock.style.background = '#94a3b8';
+          } else {
+            detailBlock.style.background = BLOCK_GRADIENTS[areaIndex % BLOCK_GRADIENTS.length];
+          }
+
+          let detailCardsHtml = allPeopleInArea.length === 0 
+            ? '<div style="font-style: italic; opacity: 0.9; text-align: center; margin-top: 10px;">No personnel assigned</div>' 
+            : '';
+
+          allPeopleInArea.forEach(p => {
+             detailCardsHtml += generateUserCardHTML(p, targetArea.name);
+          });
+
+          detailBlock.innerHTML = `
+            <div class="simple-area-title" style="font-size: 26px;">
+              ${targetArea.name} - Detailed Roster
+              <span class="area-count-badge" style="font-size: 16px;">${allPeopleInArea.length} Total Assigned</span>
+            </div>
+            <div style="font-size: 13px; opacity: 0.9; margin-top: -10px; margin-bottom: 10px;">
+              Displaying all personnel regardless of current dashboard filters.
+            </div>
+            <div class="simple-cards-grid">
+              ${detailCardsHtml}
+            </div>
+          `;
+          detailsContainer.appendChild(detailBlock);
+        }
+      }
     }
 
     window.onload = function() { 
