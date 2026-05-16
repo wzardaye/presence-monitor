@@ -106,19 +106,6 @@
     .stats-info span { font-size: 14px; color: #555; }
 
     /* NAVIGATION BAR */
-    .top-banner {
-      background: rgba(245, 185, 39, 0.96);
-      color: white;
-      font-size: 36px;
-      font-weight: 700;
-      text-align: center;
-      padding: 20px 0;
-      letter-spacing: 2px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      z-index: 100;
-      border: none;
-    }
-
     .nav-bar {
       background: rgba(245, 185, 39, 0.96);
       display: flex;
@@ -285,7 +272,6 @@
     <div class="dashboard">
       <h1>Control Panel</h1>
 
-      <!-- Stats Section -->
       <div class="stats-card">
         <div id="presenceCircle" class="circle-wrap">
           <div class="circle-inner">
@@ -298,7 +284,6 @@
         </div>
       </div>
 
-      <!-- Daily Logs Table -->
       <div class="logs-section">
         <h2>Daily Presence Logs</h2>
         <table class="log-table">
@@ -319,10 +304,8 @@
         <strong>Mock Mode Active:</strong> Backend disconnected. Using simulation.
       </div>
 
-      <!-- People Grid -->
       <div id="people" class="grid"></div>
 
-      <!-- Move Area Modal -->
       <div id="areaModal" class="modal">
         <div class="modal-content">
           <h3>Move to Area</h3>
@@ -334,6 +317,23 @@
           </div>
         </div>
       </div>
+
+      <div id="shiftModal" class="modal">
+        <div class="modal-content">
+          <h3>Change Shift</h3>
+          <select id="shiftSelect">
+            <option value="1">Shift 1</option>
+            <option value="2">Shift 2</option>
+            <option value="Non Shift">Non Shift</option>
+          </select>
+
+          <div class="modal-actions">
+            <button class="btn-toggle" onclick="confirmShift()">Confirm</button>
+            <button class="btn-move" onclick="closeModal()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -356,7 +356,6 @@
     }
 
     function reloadData() {
-      // FIX 1: Add timestamp to bypass Vercel Edge Caching forever
       fetch('/api/data?t=' + new Date().getTime())
         .then(res => {
           if (!res.ok) throw new Error("API not reachable");
@@ -430,35 +429,30 @@
           <div class="shift-period">Shift: ${p.shift || 1}</div>
           <div class="btn-group">
             <button class="btn-toggle" onclick="togglePresence('${p.id}')">Toggle Presence</button>
-            <button class="btn-shift" onclick="toggleShift('${p.id}')">Toggle Shift</button>
+            <button class="btn-shift" onclick="openShiftModal('${p.id}')">Change Shift</button>
             <button class="btn-move" onclick="moveArea('${p.id}')">Move</button>
           </div>`;
         container.appendChild(div);
       });
     }
 
-    // FIX 2: Optimistic UI Updates! Update screen instantly, sync in background.
     function togglePresence(id) {
       const person = DATA.people.find(x => x.id === id);
       if (!person) return;
       
       let reasonText = "";
       
-      // If they are currently present, they are about to be marked absent. Ask for reason!
       if (person.present) {
         reasonText = prompt("Please enter a reason for absence:");
-        // If they click Cancel on the prompt, abort the update entirely
         if (reasonText === null) return; 
       }
 
-      // Instant Screen Update
       person.present = !person.present;
-      person.reason = reasonText; // Temporarily save to local memory for UI
+      person.reason = reasonText; 
       
       render(DATA);
       updateCircle(DATA.people.filter(p => p.present).length, DATA.people.length);
 
-      // Quiet Background Sync with the Reason included
       fetch('/api/presence', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -470,19 +464,33 @@
       }).catch(err => console.error("Update failed", err));
     }
 
-    function toggleShift(id) {
+    function openShiftModal(id) {
+      selectedUserId = id;
       const person = DATA.people.find(x => x.id === id);
       if (!person) return;
 
-      // Instant Screen Update
-      person.shift = person.shift === 1 ? 2 : 1;
-      render(DATA);
+      const select = document.getElementById('shiftSelect');
+      // Set dropdown value to match current shift
+      select.value = person.shift || "1";
 
-      // Quiet Background Sync
+      document.getElementById('shiftModal').style.display = 'flex';
+    }
+
+    function confirmShift() {
+      const selectedShift = document.getElementById('shiftSelect').value;
+      const person = DATA.people.find(x => x.id === selectedUserId);
+
+      if (person) {
+        // Konversi tipe data agar selaras dengan Main Dashboard
+        person.shift = (selectedShift === '1' || selectedShift === '2') ? parseInt(selectedShift) : selectedShift;
+        render(DATA);
+      }
+      closeModal();
+
       fetch('/api/shift', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, shift: person.shift })
+        body: JSON.stringify({ id: selectedUserId, shift: person.shift })
       }).catch(err => console.error("Update failed", err));
     }
 
@@ -503,13 +511,11 @@
       const person = DATA.people.find(x => x.id === selectedUserId);
       
       if (person) {
-        // Instant Screen Update
         person.areas = selectedArea ? [selectedArea] : [];
         render(DATA);
       }
       closeModal();
 
-      // Quiet Background Sync
       fetch('/api/move', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -517,7 +523,10 @@
       }).catch(err => console.error("Update failed", err));
     }
 
-    function closeModal() { document.getElementById('areaModal').style.display = 'none'; }
+    function closeModal() { 
+      document.getElementById('areaModal').style.display = 'none'; 
+      document.getElementById('shiftModal').style.display = 'none'; 
+    }
 
     window.onload = init;
   </script>
