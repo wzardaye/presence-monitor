@@ -780,22 +780,22 @@
         { 
           name: "Dev Lead", 
           filter: p => isLeadOrSpv(p),
-          color: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)' // Warna Gelap/Hitam
+          color: 'linear-gradient(135deg, #ff8000 0%, #ff9933 100%)' // Sesuai request: Orange
         },
         { 
           name: "Shift A", 
           filter: p => (p.shift === 1 || String(p.shift).toUpperCase() === 'A') && !isLeadOrSpv(p),
-          color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' // Warna Biru
+          color: 'linear-gradient(135deg, #afff00 0%, #bfff33 100%)' // Sesuai request: Lime Green
         },
         { 
           name: "Shift B", 
           filter: p => (p.shift === 2 || String(p.shift).toUpperCase() === 'B') && !isLeadOrSpv(p),
-          color: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' // Warna Oranye/Kuning
+          color: 'linear-gradient(135deg, #00ffba 0%, #33ffcc 100%)' // Sesuai request: Teal/Cyan
         },
         { 
           name: "Non Shift", 
           filter: p => p.shift !== 1 && p.shift !== 2 && String(p.shift).toUpperCase() !== 'A' && String(p.shift).toUpperCase() !== 'B' && !isLeadOrSpv(p),
-          color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' // Warna Hijau
+          color: 'linear-gradient(135deg, #9f00ff 0%, #b333ff 100%)' // Sesuai request: Purple
         }
       ];
 
