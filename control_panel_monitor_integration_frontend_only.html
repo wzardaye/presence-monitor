@@ -148,7 +148,41 @@
     .log-table th, .log-table td { text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0; }
     .log-table th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 14px; }
     .log-table td { color: #334155; font-size: 14px; }
-    .log-badge { background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+    
+    /* FILTERS SECTION */
+    .filters-container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .filter-item label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #64748b;
+    }
+
+    .filter-item select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      color: #1e293b;
+      outline: none;
+    }
 
     /* GRID LAYOUT */
     .grid {
@@ -304,6 +338,41 @@
         <strong>Mock Mode Active:</strong> Backend disconnected. Using simulation.
       </div>
 
+      <div class="filters-container">
+        <div class="filter-item">
+          <label>Presence</label>
+          <select id="filterPresence" onchange="updateFilters()">
+            <option value="all">All</option>
+            <option value="present">Present Only</option>
+            <option value="absent">Absent Only</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>Shift</label>
+          <select id="filterShift" onchange="updateFilters()">
+            <option value="all">All Shifts</option>
+            <option value="1">Shift 1</option>
+            <option value="2">Shift 2</option>
+            <option value="Non Shift">Non Shift</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>Area Assignment</label>
+          <select id="filterArea" onchange="updateFilters()">
+            <option value="all">All Areas</option>
+            <option value="idle">Idle / Unassigned</option>
+            </select>
+        </div>
+        <div class="filter-item">
+          <label>Role</label>
+          <select id="filterRole" onchange="updateFilters()">
+            <option value="all">All Roles</option>
+            <option value="supervisor">Supervisor / Lead Only</option>
+            <option value="operator">Operator / Staff Only</option>
+          </select>
+        </div>
+      </div>
+
       <div id="people" class="grid"></div>
 
       <div id="areaModal" class="modal">
@@ -342,6 +411,14 @@
     let selectedUserId = null;
     let isMockMode = false;
 
+    // Filter States
+    let currentFilters = {
+      presence: 'all',
+      shift: 'all',
+      area: 'all',
+      role: 'all'
+    };
+
     const FALLBACK_AVATAR = "images/0Br.png";
 
     function updateLastUpdated(timestamp) {
@@ -376,11 +453,75 @@
         document.getElementById('mockWarning').style.display = 'none';
       }
       DATA = data; 
+      
+      initAreaFilterDropdown(); // Update dynamic area filter
       render(data);
       renderLogTable(data.dailyLogs);
+      
       const presentCount = data.people.filter(p => p.present).length;
       updateCircle(presentCount, data.people.length);
       updateLastUpdated(data.lastUpdated);
+    }
+
+    // Initialize/Update the Area Filter options
+    function initAreaFilterDropdown() {
+      const select = document.getElementById('filterArea');
+      const currentVal = select.value;
+      
+      select.innerHTML = `
+        <option value="all">All Areas</option>
+        <option value="idle">Idle / Unassigned</option>
+      `;
+      
+      DATA.areas.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.name;
+        select.appendChild(opt);
+      });
+      
+      select.value = currentVal; // Restore selection
+    }
+
+    // Triggered when dropdowns change
+    function updateFilters() {
+      currentFilters.presence = document.getElementById('filterPresence').value;
+      currentFilters.shift = document.getElementById('filterShift').value;
+      currentFilters.area = document.getElementById('filterArea').value;
+      currentFilters.role = document.getElementById('filterRole').value;
+      render(DATA);
+    }
+
+    // Core Filtering Logic
+    function getFilteredPeople() {
+      return DATA.people.filter(p => {
+        // 1. Filter Presence
+        if (currentFilters.presence === 'present' && !p.present) return false;
+        if (currentFilters.presence === 'absent' && p.present) return false;
+
+        // 2. Filter Shift
+        if (currentFilters.shift !== 'all' && String(p.shift) !== currentFilters.shift) {
+          return false;
+        }
+
+        // 3. Filter Area
+        if (currentFilters.area !== 'all') {
+          if (currentFilters.area === 'idle') {
+            if (p.areas && p.areas.length > 0) return false;
+          } else {
+            if (!p.areas || !p.areas.includes(currentFilters.area)) return false;
+          }
+        }
+
+        // 4. Filter Role (Supervisor vs Operator)
+        if (currentFilters.role !== 'all') {
+          const isSpv = p.role && (p.role.toLowerCase().includes('lead') || p.role.toLowerCase().includes('supervisor'));
+          if (currentFilters.role === 'supervisor' && !isSpv) return false;
+          if (currentFilters.role === 'operator' && isSpv) return false;
+        }
+
+        return true; // Lulus semua filter
+      });
     }
 
     function renderLogTable(logs) {
@@ -412,7 +553,15 @@
       const container = document.getElementById('people');
       if (!container) return;
       container.innerHTML = '';
-      data.people.forEach(p => {
+
+      const filteredPeople = getFilteredPeople();
+
+      if (filteredPeople.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #94a3b8; background: white; border-radius: 12px; font-style: italic;">No personnel match the selected filters.</div>`;
+        return;
+      }
+
+      filteredPeople.forEach(p => {
         const div = document.createElement('div');
         div.className = 'card';
         const areaNames = (p.areas && p.areas.length > 0)
@@ -470,7 +619,6 @@
       if (!person) return;
 
       const select = document.getElementById('shiftSelect');
-      // Set dropdown value to match current shift
       select.value = person.shift || "1";
 
       document.getElementById('shiftModal').style.display = 'flex';
@@ -481,7 +629,6 @@
       const person = DATA.people.find(x => x.id === selectedUserId);
 
       if (person) {
-        // Konversi tipe data agar selaras dengan Main Dashboard
         person.shift = (selectedShift === '1' || selectedShift === '2') ? parseInt(selectedShift) : selectedShift;
         render(DATA);
       }
