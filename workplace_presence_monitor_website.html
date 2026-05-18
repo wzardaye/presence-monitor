@@ -376,8 +376,15 @@
       border-radius: 4px;
     }
     .org-horizontal-container .simple-area-block {
-      min-width: 480px;
       flex: 0 0 auto; /* Mencegah block menyusut */
+    }
+
+    .block-1col {
+      width: 280px;
+    }
+    
+    .block-2col {
+      width: 540px;
     }
 
     .cards-grid-1col {
@@ -822,8 +829,12 @@
         // Jangan tampilkan jika grup kosong & disetel ke hide
         if (peopleInGroup.length === 0 && !showAbsentAndEmpty) return;
 
+        const isOneCol = (group.name === "Dev Lead" || group.name === "Non Shift");
+        const layoutClass = isOneCol ? "cards-grid-1col" : "cards-grid-2col";
+        const widthClass = isOneCol ? "block-1col" : "block-2col";
+
         const block = document.createElement('div');
-        block.className = 'simple-area-block';
+        block.className = `simple-area-block ${widthClass}`;
         
         // Warna abu-abu jika kosong sama sekali, sebaliknya gunakan warna grup
         if (peopleInGroup.length === 0) {
@@ -831,11 +842,6 @@
         } else {
           block.style.background = group.color;
         }
-
-        // Logika layout bersusun atau kolom berdasarkan nama grup
-        const layoutClass = (group.name === "Dev Lead" || group.name === "Non Shift") 
-          ? "cards-grid-1col" 
-          : "cards-grid-2col";
 
         let cardsHtml = peopleInGroup.length === 0 
           ? `<div style="font-style: italic; opacity: 0.9; text-align: center; margin-top: 10px; grid-column: 1 / -1;">No personnel</div>` 
