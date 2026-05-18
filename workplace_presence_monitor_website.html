@@ -380,6 +380,12 @@
       flex: 0 0 auto; /* Mencegah block menyusut */
     }
 
+    .cards-grid-1col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
     .cards-grid-2col {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -826,8 +832,13 @@
           block.style.background = group.color;
         }
 
+        // Logika layout bersusun atau kolom berdasarkan nama grup
+        const layoutClass = (group.name === "Dev Lead" || group.name === "Non Shift") 
+          ? "cards-grid-1col" 
+          : "cards-grid-2col";
+
         let cardsHtml = peopleInGroup.length === 0 
-          ? '<div style="font-style: italic; opacity: 0.9; text-align: center; margin-top: 10px; grid-column: span 2;">No personnel</div>' 
+          ? `<div style="font-style: italic; opacity: 0.9; text-align: center; margin-top: 10px; grid-column: 1 / -1;">No personnel</div>` 
           : '';
 
         peopleInGroup.forEach(p => {
@@ -874,7 +885,7 @@
             ${group.name}
             <span class="area-count-badge">${peopleInGroup.length} People</span>
           </div>
-          <div class="cards-grid-2col">
+          <div class="${layoutClass}">
             ${cardsHtml}
           </div>
         `;
