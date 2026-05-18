@@ -546,10 +546,9 @@
           if (shiftValue !== 'all' && (!person.shift || String(person.shift) !== shiftValue)) return;
           if (presenceValue === 'present' && !person.present) return;
           if (presenceValue === 'absent' && person.present) return;
-          const isPersAssigned = (person.areas && person.areas.length > 0 && person.areas[0] !== "" && person.areas[0] !== null);
-          if (filterValue === 'idle' && isPersAssigned) return;
-          if (filterValue === 'assigned' && !isPersAssigned) return;
-
+          
+          // Mengabaikan filterDropdown ('idle'/'assigned') di sini 
+          // agar area map tetap menampilkan pekerja yang sudah dialokasikan
           if (person.areas && person.areas.includes(area.id)) {
             filteredPeopleInArea.push(person);
           }
