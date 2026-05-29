@@ -1284,26 +1284,17 @@
       const tbody = document.getElementById('logTable');
       if (!tbody) return;
       tbody.innerHTML = '';
+      
       let logs = DATA.dailyLogs || [];
-      const todayStr = new Date().toLocaleDateString('en-GB');
-      const active = getActivePeople();
-      const present = active.filter(p => p.present).length;
-      const total = active.length;
-      if (total > 0) {
-        const percent = Math.round((present / total) * 100);
-        let msg = `${percent}% were present at ${todayStr}`;
-        if (currentShiftView !== 'all') msg += ` (Shift ${currentShiftView})`;
-        const idx = logs.findIndex(l => l.date === todayStr);
-        if (idx >= 0) logs[idx].message = msg;
-        else logs.push({ date: todayStr, message: msg });
+      
+      if (logs.length === 0) {
+         tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #94a3b8;">No logs available</td></tr>';
+         return;
       }
-      logs.sort((a, b) => {
-        const [da, ma, ya] = a.date.split('/');
-        const [db, mb, yb] = b.date.split('/');
-        return new Date(yb, mb-1, db) - new Date(ya, ma-1, da);
-      }).forEach(log => {
+
+      logs.forEach(log => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${log.date}</td><td>${log.message}</td>`;
+        tr.innerHTML = `<td><strong>${log.date}</strong></td><td>${log.message}</td>`;
         tbody.appendChild(tr);
       });
     }
