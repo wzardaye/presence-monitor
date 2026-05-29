@@ -78,18 +78,41 @@ async function readData() {
   } catch (err) {
     console.error("MongoDB Read Error:", err.message);
   }
-  return { people: [], areas: [], lastUpdated: new Date().toISOString() };
+  return { people: [], areas: [], dailyLogs: [], lastUpdated: new Date().toISOString() };
 }
 
 async function writeData(data) {
   data.lastUpdated = new Date().toISOString(); 
+  
+  // LOGIKA DAILY LOG BARU
+  const todayStr = new Date().toLocaleDateString('en-GB'); // Format: DD/MM/YYYY
+  const totalPeople = data.people ? data.people.length : 0;
+  const presentCount = data.people ? data.people.filter(p => p.present).length : 0;
+  const percent = totalPeople > 0 ? Math.round((presentCount / totalPeople) * 100) : 0;
+  const logMessage = `${percent}% of all employees were present at ${todayStr}`;
+
+  if (!data.dailyLogs) data.dailyLogs = [];
+  
+  const existingLogIndex = data.dailyLogs.findIndex(l => l.date === todayStr);
+  
+  if (existingLogIndex >= 0) {
+    data.dailyLogs[existingLogIndex].message = logMessage;
+  } else {
+    data.dailyLogs.unshift({ date: todayStr, message: logMessage });
+  }
+
   try {
     const { db } = await connectToDatabase();
     const collection = db.collection('app_data');
     
     await collection.updateOne(
       { documentId: 'main_data' },
-      { $set: { people: data.people, areas: data.areas, lastUpdated: data.lastUpdated } },
+      { $set: { 
+          people: data.people, 
+          areas: data.areas, 
+          dailyLogs: data.dailyLogs, // <-- dailyLogs sekarang ikut disimpan
+          lastUpdated: data.lastUpdated 
+      } },
       { upsert: true }
     );
   } catch (err) {
